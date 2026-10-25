@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Budof — Startup Runway & Burn Rate Simulator | SaaS Unit Economics & Tycoon Game</title>
-  <meta name="description" content="Free, 100% in-browser startup runway simulator, SaaS unit economics calculator (CAC, LTV, Magic Number, Rule of 40), and 24-month startup tycoon business simulation.">
-  <meta name="keywords" content="startup runway calculator, burn rate simulator, saas unit economics, cac payback period, ltv cac calculator, magic number saas, rule of 40, startup tycoon game, saas valuation multiple">
+  <meta name="description" content="Free, 100% in-browser startup runway simulator, SaaS unit economics calculator (CAC, LTV, Magic Number, Rule of 40), valuation multiples, cap table dilution, and 24-month startup tycoon business simulation.">
+  <meta name="keywords" content="startup runway calculator, burn rate simulator, saas unit economics, cac payback period, ltv cac calculator, magic number saas, rule of 40, startup tycoon game, saas valuation multiple, cap table dilution calculator, fundraising target calculator">
   <link rel="canonical" href="https://budof.com/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
@@ -13,11 +13,11 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://budof.com/">
   <meta property="og:title" content="Budof — Startup Runway & Financial Simulation Suite">
-  <meta property="og:description" content="Model 36-month startup burn, SaaS unit economics, valuation multiples, and test your founder skills in the 24-month Startup Tycoon game. Free, zero registration.">
+  <meta property="og:description" content="Model 36-month startup burn, SaaS unit economics, cap table dilution, and test your founder skills in the 24-month Startup Tycoon game. Free, zero registration.">
   <meta property="og:site_name" content="Budof">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Budof — Startup Runway & SaaS Financial Modeling">
-  <meta name="twitter:description" content="Calculate your zero-cash date, LTV:CAC, valuation multiples, and test your founder survival in the browser.">
+  <meta name="twitter:description" content="Calculate your zero-cash date, LTV:CAC, cap table dilution, and test your founder survival in the browser.">
 
   <!-- Typography: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,10 @@
 
   <link rel="stylesheet" href="styles.css">
 
-  <!-- JSON-LD Structured Data -->
+  <!-- Google AdSense Verification & Runtime Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0897820292119776" crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data: WebApplication -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -40,7 +43,65 @@
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "Interactive startup runway calculator, SaaS unit economics engine, valuation multiple estimator, and turn-based startup tycoon simulation game."
+    "description": "Interactive startup runway calculator, SaaS unit economics engine, valuation multiple estimator, cap table dilution model, and turn-based startup tycoon simulation game."
+  }
+  </script>
+
+  <!-- JSON-LD Structured Data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How is startup runway calculated, and what is a safe buffer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Startup runway measures the number of months your company can operate before its cash reserves are depleted. It is calculated as: Total Cash Balance divided by Net Monthly Burn (where Net Burn = Gross Operating Expenses minus Monthly Recurring Revenue). Top venture investors recommend maintaining at least 18 to 24 months of runway with a 20% safety margin for market volatility."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Paul Graham's 'Default Alive' framework?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In 2015, Y Combinator co-founder Paul Graham introduced 'Default Alive vs Default Dead'. A startup is Default Alive if its revenue will grow to surpass expenses before its cash reserves hit zero. If revenue growth is too slow to reach profitability before running out of cash, the startup is Default Dead and will perish unless it raises external funding or cuts burn immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a healthy CAC Payback Period for early-stage B2B SaaS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CAC Payback Period is the number of months required to recover the cost of acquiring a customer (CAC / Monthly Gross Profit per Customer). An elite benchmark is under 12 months, allowing a company to self-fund its customer acquisition engine. A payback period of 12 to 18 months is acceptable, while over 24 months creates severe working capital constraints."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the SaaS Rule of 40 work, and what is an elite score?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Rule of 40 states that a software company's combined annual revenue growth rate percentage and free cash flow margin percentage should equal or exceed 40%. For example, a startup growing at 55% with a -10% cash burn margin scores 45%, qualifying as an elite venture-grade business that balances growth with capital efficiency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why should founders apply a 15% employer tax buffer to salaries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Base employee salaries do not reflect the true cost of headcount. Employers must pay mandatory state and federal employment taxes (FICA, Medicare, FUTA, SUTA), worker's compensation insurance, payroll processing software fees, and basic healthcare benefits. A 15% overhead multiplier (Salary x 1.15) provides an accurate operational forecast."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do venture capitalists calculate ARR valuation multiples in 2026/2027?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In modern venture markets, enterprise software valuations are primarily determined as a multiple of Annual Recurring Revenue (ARR). Median private B2B SaaS multiples range between 6x and 9x ARR. However, companies exceeding the Rule of 40 with net dollar retention over 120% command premium multiples of 12x to 20x ARR."
+        }
+      }
+    ]
   }
   </script>
 </head>
@@ -73,19 +134,27 @@
       <div class="nav-tabs-container">
         <button class="nav-tab-btn active" data-tab="tab-runway">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-          Runway & Burn Forecaster
+          Runway Forecaster
         </button>
         <button class="nav-tab-btn" data-tab="tab-unit-economics">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-          SaaS Unit Economics (CAC/LTV)
+          SaaS Unit Economics
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-calculators">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Founder Calculators
         </button>
         <button class="nav-tab-btn" data-tab="tab-pricing">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          Tier Pricing & MRR Elasticity
+          Pricing & MRR Elasticity
         </button>
         <button class="nav-tab-btn" data-tab="tab-benchmarks">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           SaaS Benchmarks & Valuation
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-perks">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+          Founder Perks & Deals
         </button>
         <button class="nav-tab-btn" data-tab="tab-tycoon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
@@ -95,12 +164,14 @@
     </nav>
   </header>
 
-  <!-- Top Sponsor & Ad Slot (Fixed 728x90, CLS = 0) -->
+  <!-- Top Sponsor & Ad Container (Fixed 728x90, CLS = 0) -->
   <div class="main-content" style="padding-bottom: 0;">
     <div class="ad-slot-leaderboard" id="ad-top-slot">
-      <div style="text-align: center; font-size: 11px;">
-        <span style="font-weight: 700; color: #059669; text-transform: uppercase;">Founder Financial Toolkit</span> • Verified B2B SaaS Banking, High-Yield Treasury & Payroll
-      </div>
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-0897820292119776"
+           data-ad-slot="9812739102"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
   </div>
 
@@ -109,6 +180,25 @@
     <!-- TAB 1: RUNWAY & BURN FORECASTER -->
     <section id="tab-runway" class="tab-panel active">
       
+      <!-- Company Name & Currency Selector Bar -->
+      <div class="company-bar-wrapper">
+        <div class="company-meta-left">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Company / Project:</span>
+          <input type="text" id="input-company-name" class="company-name-input" placeholder="Your Startup Name" value="Acme Software Inc.">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Currency:</span>
+          <select id="select-currency" class="currency-select" aria-label="Select Currency">
+            <option value="$">$ USD (US Dollar)</option>
+            <option value="€">€ EUR (Euro)</option>
+            <option value="£">£ GBP (British Pound)</option>
+            <option value="₹">₹ INR (Indian Rupee)</option>
+            <option value="C$">C$ CAD (Canadian Dollar)</option>
+            <option value="A$">A$ AUD (Australian Dollar)</option>
+          </select>
+        </div>
+      </div>
+
       <!-- Presets Bar (1-Click Real-World Models) -->
       <div class="presets-bar-wrapper">
         <div class="presets-label">⚡ 1-Click Industry Financial Models (Pre-Loaded Verified Benchmarks)</div>
@@ -176,12 +266,12 @@
 
             <div style="margin-top: 14px; display: flex; gap: 8px;">
               <input type="text" id="new-hire-role" placeholder="Role (e.g. Sales Rep)" class="input-num" style="font-size: 12px; flex: 1;">
-              <input type="number" id="new-hire-salary" placeholder="$ / Mo" class="input-num" style="width: 80px; font-size: 12px;" value="6000">
+              <input type="number" id="new-hire-salary" placeholder="Salary / Mo" class="input-num" style="width: 90px; font-size: 12px;" value="6000">
               <button id="btn-add-hire" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">+ Add</button>
             </div>
           </div>
 
-          <!-- Sidebar Sponsor Card -->
+          <!-- Sidebar Sponsor Card (300x250) -->
           <div class="ad-slot-rectangle">
             <div style="text-align: center; padding: 16px;">
               <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 6px;">Sponsored Solution</div>
@@ -334,12 +424,12 @@
             </div>
 
             <div class="form-group">
-              <label for="input-sm-spend" class="form-label">Quarterly S&M Spend ($)</label>
+              <label for="input-sm-spend" class="form-label">Quarterly S&M Spend</label>
               <input type="number" id="input-sm-spend" class="input-num" value="8000">
             </div>
 
             <div class="form-group">
-              <label for="input-net-arr" class="form-label">Net New ARR Added ($)</label>
+              <label for="input-net-arr" class="form-label">Net New ARR Added</label>
               <input type="number" id="input-net-arr" class="input-num" value="22000">
             </div>
 
@@ -416,7 +506,98 @@
       </div>
     </section>
 
-    <!-- TAB 3: TIER PRICING & MRR ELASTICITY -->
+    <!-- TAB 3: HIGH-INTENT FOUNDER CALCULATORS -->
+    <section id="tab-calculators" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Founder Strategic Decision Calculators</h3>
+            <p class="card-subtitle">Determine exact fundraising requirements, cap table equity dilution, and hiring runway impact</p>
+          </div>
+        </div>
+
+        <div class="calculators-grid">
+          
+          <!-- Calculator 1: Fundraising Target -->
+          <div class="calc-card">
+            <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">💰 Fundraising Target Calculator</h4>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">Calculate how much capital to raise for your desired runway target.</p>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="calc-target-months" class="form-label">Desired Runway Target</label>
+                <span id="display-target-months" class="form-val-display mono">18 mos</span>
+              </div>
+              <input type="range" id="calc-target-months" class="range-slider" min="6" max="36" step="3" value="18">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="calc-safety-buffer" class="form-label">Safety Contingency Buffer</label>
+                <span id="display-safety-buffer" class="form-val-display mono">20%</span>
+              </div>
+              <input type="range" id="calc-safety-buffer" class="range-slider" min="0" max="40" step="5" value="20">
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px;">
+              <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700;">Recommended Raise Target:</div>
+              <div id="calc-res-total-raise" class="mono green" style="font-size: 24px; font-weight: 800; margin: 4px 0;">$360,000</div>
+              <div style="font-size: 11px; color: #334155;">Round Tier: <strong id="calc-res-round-tier">Late Angel / Pre-Seed</strong></div>
+              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Implied Post-Money: <span id="calc-res-implied-post" class="mono">$3,600,000</span></div>
+            </div>
+          </div>
+
+          <!-- Calculator 2: Cap Table Equity Dilution -->
+          <div class="calc-card">
+            <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">🍰 Cap Table & Dilution Calculator</h4>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">Compute investor ownership and founder equity retention after option pool shuffle.</p>
+
+            <div class="form-group">
+              <label for="calc-pre-money" class="form-label">Pre-Money Valuation</label>
+              <input type="number" id="calc-pre-money" class="input-num" value="4000000" step="250000">
+            </div>
+
+            <div class="form-group">
+              <label for="calc-investment" class="form-label">Investment Amount</label>
+              <input type="number" id="calc-investment" class="input-num" value="1000000" step="100000">
+            </div>
+
+            <div class="form-group">
+              <label for="calc-option-pool" class="form-label">Employee Option Pool %</label>
+              <input type="number" id="calc-option-pool" class="input-num" value="10" step="1">
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px;">
+              <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700;">Post-Money Valuation:</div>
+              <div id="calc-res-post-val" class="mono green" style="font-size: 24px; font-weight: 800; margin: 4px 0;">$5,000,000</div>
+              <div style="font-size: 11px; color: #334155;">Founders Retain: <strong id="calc-res-founder-eq">72.0% (36.0% / co-founder)</strong></div>
+              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Investor Ownership: <span id="calc-res-investor-eq" class="mono">20.0% (+10% Pool)</span></div>
+            </div>
+          </div>
+
+          <!-- Calculator 3: Hiring Runway Impact -->
+          <div class="calc-card">
+            <h4 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">👥 Hiring Runway Impact Calculator</h4>
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">See how many months of runway are consumed before offering a job candidate.</p>
+
+            <div class="form-group">
+              <label for="calc-new-salary" class="form-label">Proposed Base Salary / Month</label>
+              <input type="number" id="calc-new-salary" class="input-num" value="7500" step="500">
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px;">
+              <div style="font-size: 11px; text-transform: uppercase; color: #64748B; font-weight: 700;">Runway Impact:</div>
+              <div id="calc-res-runway-lost" class="mono crimson" style="font-size: 24px; font-weight: 800; margin: 4px 0;">-2.4 months</div>
+              <div style="font-size: 11px; color: #334155;">Fully Loaded Monthly Cost: <strong id="calc-res-loaded-cost" class="mono">$8,625/mo</strong></div>
+              <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Breakeven MRR Needed: <span id="calc-res-breakeven-mrr" class="mono green">+8,625 MRR</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: TIER PRICING & MRR ELASTICITY -->
     <section id="tab-pricing" class="tab-panel">
       <div class="workbench-grid">
         
@@ -433,17 +614,17 @@
             </div>
 
             <div class="form-group">
-              <label for="pricing-starter-price" class="form-label">Starter Tier Price ($/mo)</label>
+              <label for="pricing-starter-price" class="form-label">Starter Tier Price / Mo</label>
               <input type="number" id="pricing-starter-price" class="input-num" value="29">
             </div>
 
             <div class="form-group">
-              <label for="pricing-pro-price" class="form-label">Pro Tier Price ($/mo)</label>
+              <label for="pricing-pro-price" class="form-label">Pro Tier Price / Mo</label>
               <input type="number" id="pricing-pro-price" class="input-num" value="79">
             </div>
 
             <div class="form-group">
-              <label for="pricing-enterprise-price" class="form-label">Enterprise Tier Price ($/mo)</label>
+              <label for="pricing-enterprise-price" class="form-label">Enterprise Tier Price / Mo</label>
               <input type="number" id="pricing-enterprise-price" class="input-num" value="299">
             </div>
 
@@ -518,7 +699,7 @@
       </div>
     </section>
 
-    <!-- TAB 4: SAAS BENCHMARKS & VALUATION ENCYCLOPEDIA -->
+    <!-- TAB 5: SAAS BENCHMARKS & VALUATION ENCYCLOPEDIA -->
     <section id="tab-benchmarks" class="tab-panel">
       
       <!-- Interactive Valuation Multiple Estimator -->
@@ -532,7 +713,7 @@
 
         <div class="valuation-slider-grid">
           <div class="form-group">
-            <label for="val-arr-input" class="form-label">Current ARR ($)</label>
+            <label for="val-arr-input" class="form-label">Current ARR</label>
             <input type="number" id="val-arr-input" class="input-num" value="500000" step="50000">
           </div>
           <div class="form-group">
@@ -608,7 +789,23 @@
 
     </section>
 
-    <!-- TAB 5: STARTUP TYCOON SIMULATOR (24-MONTH GAME) -->
+    <!-- TAB 6: FOUNDER PERKS & B2B DEALS HUB -->
+    <section id="tab-perks" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Curated Founder Perks & B2B Startup Discounts</h3>
+            <p class="card-subtitle">Claim verified treasury yields, cloud infrastructure credits, and corporate banking perks</p>
+          </div>
+        </div>
+
+        <div id="perks-grid-container" class="perks-grid">
+          <!-- Populated dynamically via deals.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: STARTUP TYCOON SIMULATOR (24-MONTH GAME) -->
     <section id="tab-tycoon" class="tab-panel">
       
       <!-- Tycoon Top HUD -->
@@ -812,7 +1009,23 @@
       </div>
     </section>
 
+    <!-- FREQUENTLY ASKED QUESTIONS SECTION -->
+    <section class="card" style="margin-top: 24px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Frequently Asked Questions (Founder Finance Guide)</h3>
+          <p class="card-subtitle">Authoritative guidelines on runway modeling, SaaS unit economics, and venture valuation</p>
+        </div>
+      </div>
+      <div id="faqs-accordion-container" class="faq-accordion">
+        <!-- Dynamically rendered via faqs.js -->
+      </div>
+    </section>
+
   </main>
+
+  <!-- Executive Board Report Printable Container (Hidden on screen, prints in @media print) -->
+  <div id="executive-board-report"></div>
 
   <!-- Tycoon Event Dilemma Modal -->
   <div id="event-modal-overlay" class="modal-overlay">
@@ -857,7 +1070,7 @@
           <button id="btn-submit-feedback" class="btn-primary">Send Message</button>
           <button id="btn-close-feedback" class="btn-secondary">Close</button>
         </div>
-        <div id="feedback-success" style="display:none; color:#059669; font-weight:600; font-size:12px; margin-top:4px;">✓ Thank you! Your feedback has been noted.</div>
+        <div id="feedback-success" style="display:none; color:#059669; font-weight:600; font-size:12px; margin-top:4px;">✓ Thank you! Your feedback has been saved.</div>
       </div>
     </div>
   </div>
@@ -871,7 +1084,10 @@
       <div class="footer-links">
         <a href="#runway" class="footer-tab-link" data-tab="tab-runway">Runway Calculator</a>
         <a href="#unit-economics" class="footer-tab-link" data-tab="tab-unit-economics">SaaS CAC/LTV</a>
+        <a href="#calculators" class="footer-tab-link" data-tab="tab-calculators">Founder Calculators</a>
+        <a href="#pricing" class="footer-tab-link" data-tab="tab-pricing">Pricing Elasticity</a>
         <a href="#benchmarks" class="footer-tab-link" data-tab="tab-benchmarks">SaaS Benchmarks</a>
+        <a href="#perks" class="footer-tab-link" data-tab="tab-perks">Founder Perks</a>
         <a href="#tycoon" class="footer-tab-link" data-tab="tab-tycoon">Startup Game</a>
         <a href="#" id="link-privacy">Privacy Policy</a>
         <a href="#" id="link-terms">Terms of Use</a>

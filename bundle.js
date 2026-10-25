@@ -4,22 +4,35 @@
 
   // --- MODULE: js/utils/formatters.js ---
   /**
-   * Formatters utility for financial numbers, percentages, and currencies.
+   * Formatters utility for financial numbers, percentages, currencies, and multi-currency support.
    */
-  function formatCurrency(amount, decimals = 0) {
-    if (typeof amount !== 'number' || isNaN(amount)) return '$0';
+  
+  let currentCurrency = '$';
+  function setCurrency(symbol) {
+    if (symbol && typeof symbol === 'string') {
+      currentCurrency = symbol.trim();
+    }
+    return currentCurrency;
+  }
+  function getCurrency() {
+    return currentCurrency;
+  }
+  function formatCurrency(amount, decimals = 0, currencyOverride = null) {
+    if (typeof amount !== 'number' || isNaN(amount)) return `${currencyOverride || currentCurrency}0`;
     const isNegative = amount < 0;
     const abs = Math.abs(amount);
+    const symbol = currencyOverride || currentCurrency;
     const formatted = abs.toLocaleString('en-US', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-    return isNegative ? `-$${formatted}` : `$${formatted}`;
+    return isNegative ? `-${symbol}${formatted}` : `${symbol}${formatted}`;
   }
-  function formatCompactCurrency(amount) {
-    if (typeof amount !== 'number' || isNaN(amount)) return '$0';
+  function formatCompactCurrency(amount, currencyOverride = null) {
+    if (typeof amount !== 'number' || isNaN(amount)) return `${currencyOverride || currentCurrency}0`;
     const isNegative = amount < 0;
     const abs = Math.abs(amount);
+    const symbol = currencyOverride || currentCurrency;
   
     let formatted = '';
     if (abs >= 1_000_000_000) {
@@ -32,7 +45,7 @@
       formatted = abs.toFixed(0);
     }
   
-    return isNegative ? `-$${formatted}` : `$${formatted}`;
+    return isNegative ? `-${symbol}${formatted}` : `${symbol}${formatted}`;
   }
   function formatPercent(val, decimals = 1) {
     if (typeof val !== 'number' || isNaN(val)) return '0%';
@@ -48,7 +61,7 @@
   function formatMonths(months) {
     if (months === Infinity || months > 120) return 'Default Alive (∞)';
     if (months <= 0) return 'Depleted (0 mos)';
-    if (months === 1) return '1 month';
+    if (months === 1) return '1.0 month';
     return `${months.toFixed(1)} months`;
   }
   
@@ -381,6 +394,164 @@
   }
   
 
+  // --- MODULE: js/engine/fundraising-calculator.js ---
+  /**
+   * Startup Fundraising Target & Runway Extension Engine
+   * Computes exact capital requirement for 12, 18, or 24 months of runway with safety buffers.
+   */
+  function calculateFundraisingTarget(params = {}) {
+    const targetMonths = Math.max(6, Math.min(36, Number(params.targetRunwayMonths) || 18));
+    const netMonthlyBurn = Math.max(100, Number(params.netMonthlyBurn) || 15000);
+    const safetyBufferPct = Math.max(0, Math.min(50, Number(params.safetyBufferPct) || 20)); // e.g. 20%
+    const monthlyHiringExpansion = Math.max(0, Number(params.monthlyHiringExpansion) || 0);
+  
+    // Adjusted burn factoring in planned expansion
+    const effectiveMonthlyBurn = netMonthlyBurn + (monthlyHiringExpansion * 1.15);
+  
+    const baselineCapitalNeeded = effectiveMonthlyBurn * targetMonths;
+    const safetyBufferAmount = baselineCapitalNeeded * (safetyBufferPct / 100);
+    const totalTargetToRaise = Math.round(baselineCapitalNeeded + safetyBufferAmount);
+  
+    // Round tier categorization
+    let roundTier = 'Pre-Seed';
+    let typicalDilutionPct = 10;
+    if (totalTargetToRaise >= 3000000) {
+      roundTier = 'Series A';
+      typicalDilutionPct = 20;
+    } else if (totalTargetToRaise >= 750000) {
+      roundTier = 'Seed Round';
+      typicalDilutionPct = 15;
+    } else if (totalTargetToRaise >= 250000) {
+      roundTier = 'Late Angel / Pre-Seed';
+      typicalDilutionPct = 10;
+    } else {
+      roundTier = 'Friends & Family / Micro-Angel';
+      typicalDilutionPct = 7;
+    }
+  
+    // Estimated Post-Money Valuation needed to maintain standard dilution
+    const impliedPostMoney = Math.round(totalTargetToRaise / (typicalDilutionPct / 100));
+    const impliedPreMoney = impliedPostMoney - totalTargetToRaise;
+  
+    return {
+      targetMonths,
+      effectiveMonthlyBurn: Math.round(effectiveMonthlyBurn),
+      baselineCapitalNeeded: Math.round(baselineCapitalNeeded),
+      safetyBufferPct,
+      safetyBufferAmount: Math.round(safetyBufferAmount),
+      totalTargetToRaise,
+      roundTier,
+      typicalDilutionPct,
+      impliedPostMoney,
+      impliedPreMoney
+    };
+  }
+  
+
+  // --- MODULE: js/engine/dilution-calculator.js ---
+  /**
+   * Cap Table Equity Dilution & Pre/Post-Money Engine
+   * Calculates investor ownership, unallocated employee option pool shuffle, and founder retention.
+   */
+  function calculateEquityDilution(params = {}) {
+    const preMoney = Math.max(10000, Number(params.preMoneyValuation) || 4000000);
+    const investment = Math.max(1000, Number(params.investmentAmount) || 1000000);
+    const optionPoolPct = Math.max(0, Math.min(25, Number(params.optionPoolPct) || 10)); // e.g. 10%
+    const founderCount = Math.max(1, Number(params.founderCount) || 2);
+  
+    // Post-Money = Pre-Money + Investment
+    const postMoney = preMoney + investment;
+  
+    // Investor ownership %
+    const investorOwnershipPct = Number(((investment / postMoney) * 100).toFixed(2));
+  
+    // Option pool is typically created from pre-money equity (VC-standard Option Pool Shuffle)
+    // Effective founder ownership after option pool and investor dilution:
+    const founderEquityPct = Number(((1 - (investorOwnershipPct / 100)) * (100 - optionPoolPct)).toFixed(2));
+    const founderDilutionPct = Number((100 - founderEquityPct).toFixed(2));
+    const equityPerFounder = Number((founderEquityPct / founderCount).toFixed(2));
+  
+    // Implied value of 1% equity at post-money
+    const valuePerOnePercent = Math.round(postMoney * 0.01);
+  
+    return {
+      preMoney,
+      investment,
+      postMoney,
+      optionPoolPct,
+      investorOwnershipPct,
+      founderEquityPct,
+      founderDilutionPct,
+      founderCount,
+      equityPerFounder,
+      valuePerOnePercent
+    };
+  }
+  
+
+  // --- MODULE: js/engine/hiring-impact-calculator.js ---
+  /**
+   * Hiring Runway Impact & Zero-Cash Delta Engine
+   * Calculates the exact number of runway months consumed when hiring a new team member.
+   */
+  function calculateHiringImpact(baseParams = {}, newRole = {}) {
+    const newSalary = Math.max(0, Number(newRole.monthlySalary) || 0);
+    const startMonth = Math.max(1, Number(newRole.startMonth) || 1);
+    const roleName = newRole.role || 'New Hire';
+  
+    // Baseline calculation without this new hire
+    const baselineRunwayResult = calculateRunway(baseParams);
+  
+    // Clone headcount and append new hire
+    const existingHeadcount = Array.isArray(baseParams.headcount) ? baseParams.headcount : [];
+    const modifiedHeadcount = [
+      ...existingHeadcount,
+      {
+        id: 'simulation_hire',
+        role: roleName,
+        monthlySalary: newSalary,
+        startMonth
+      }
+    ];
+  
+    // Recalculate with new hire
+    const newRunwayResult = calculateRunway({
+      ...baseParams,
+      headcount: modifiedHeadcount
+    });
+  
+    const baseMonths = baselineRunwayResult.runwayMonths;
+    const newMonths = newRunwayResult.runwayMonths;
+  
+    let runwayMonthsLost = 0;
+    if (baseMonths !== Infinity && newMonths !== Infinity) {
+      runwayMonthsLost = Number(Math.max(0, baseMonths - newMonths).toFixed(1));
+    } else if (baseMonths === Infinity && newMonths !== Infinity) {
+      runwayMonthsLost = 'Turns Default Alive into Default Dead';
+    }
+  
+    // Monthly fully-loaded cost (salary + 15% taxes/benefits)
+    const fullyLoadedMonthlyCost = Math.round(newSalary * TAX_BENEFITS_MULTIPLIER);
+    const annualFullyLoadedCost = fullyLoadedMonthlyCost * 12;
+  
+    // Additional MRR required to achieve cash-flow neutrality for this hire
+    const requiredMRRToBreakeven = fullyLoadedMonthlyCost;
+  
+    return {
+      roleName,
+      monthlySalary: newSalary,
+      fullyLoadedMonthlyCost,
+      annualFullyLoadedCost,
+      baselineRunwayMonths: baseMonths,
+      newRunwayMonths: newMonths,
+      runwayMonthsLost,
+      requiredMRRToBreakeven,
+      newZeroCashMonth: newRunwayResult.zeroCashMonth,
+      baselineZeroCashMonth: baselineRunwayResult.zeroCashMonth
+    };
+  }
+  
+
   // --- MODULE: js/engine/presets.js ---
   /**
    * Real-World Startup Financial Model Presets
@@ -599,6 +770,127 @@
       valuationBear: Math.round(safeARR * bearMultiple),
       valuationBase: Math.round(safeARR * baseMultiple),
       valuationBull: Math.round(safeARR * bullMultiple)
+    };
+  }
+  
+
+  // --- MODULE: js/engine/deals.js ---
+  /**
+   * Curated Founder Perks, B2B Discounts & High-Yield Partner Directory
+   */
+  const FOUNDER_PERKS = [
+    {
+      id: 'mercury_banking',
+      partner: 'Mercury Bank',
+      category: 'Fintech & Banking',
+      badge: 'Popular',
+      offer: 'Earn 4.5%–5.0% APY on Idle Startup Cash + $250 Bonus',
+      description: 'FDIC-insured business checking and automated treasury designed for technology startups. Free international wires and virtual corporate cards.',
+      value: '$250 Bonus + 5% Yield',
+      url: 'https://mercury.com/',
+      cta: 'Claim Treasury Perk ➔'
+    },
+    {
+      id: 'gusto_payroll',
+      partner: 'Gusto Payroll',
+      category: 'HR & Payroll',
+      badge: 'Essential',
+      offer: 'Automate Employee & Contractor Payroll + $200 Gift Card',
+      description: 'Automated federal, state, and local payroll tax filings, healthcare benefits, and direct deposits. Used by over 300,000 growing businesses.',
+      value: '$200 Onboarding Reward',
+      url: 'https://gusto.com/',
+      cta: 'Setup Automated Payroll ➔'
+    },
+    {
+      id: 'stripe_atlas',
+      partner: 'Stripe Atlas',
+      category: 'Legal & Incorporation',
+      badge: 'Verified',
+      offer: 'Form Delaware C-Corp in 2 Days + $50k Credits',
+      description: 'The global standard for startup legal formation. Issue founder stock with 83(b) tax elections, open bank account, and unlock $50,000 in AWS/Stripe fee waivers.',
+      value: '$50,000+ Credits',
+      url: 'https://stripe.com/atlas',
+      cta: 'Incorporate Entity ➔'
+    },
+    {
+      id: 'brex_card',
+      partner: 'Brex',
+      category: 'Corporate Cards',
+      badge: 'Fintech',
+      offer: 'Corporate Credit Cards with No Personal Guarantee',
+      description: 'High-limit corporate cards with 10x-20x higher limits than traditional banks. Includes automated receipt matching and spend management software.',
+      value: '$500 Spend Bonus',
+      url: 'https://www.brex.com/',
+      cta: 'Apply for Brex ➔'
+    },
+    {
+      id: 'deel_global',
+      partner: 'Deel',
+      category: 'Global Hiring',
+      badge: 'Global Scale',
+      offer: 'Hire & Pay Contractors in 150+ Countries (20% Off)',
+      description: 'Compliant contractor contracts, local tax withholding, and localized benefits for distributed remote engineering teams.',
+      value: '20% Platform Discount',
+      url: 'https://www.deel.com/',
+      cta: 'Explore Global Hiring ➔'
+    },
+    {
+      id: 'digitalocean_cloud',
+      partner: 'DigitalOcean',
+      category: 'Cloud Hosting',
+      badge: 'Developer Cloud',
+      offer: '$200 Free Developer Cloud Credits',
+      description: 'Deploy production virtual machines (Droplets), Managed PostgreSQL databases, and serverless containers with transparent, predictable pricing.',
+      value: '$200 Free Credits',
+      url: 'https://www.digitalocean.com/',
+      cta: 'Claim Cloud Credits ➔'
+    }
+  ];
+  
+
+  // --- MODULE: js/engine/faqs.js ---
+  /**
+   * Frequently Asked Questions (FAQ) & Structured Schema Generator
+   * Targets Google Rich Snippets and Answer Box algorithms.
+   */
+  const FOUNDER_FAQS = [
+    {
+      question: 'How is startup runway calculated, and what is a safe buffer?',
+      answer: 'Startup runway measures the number of months your company can operate before its cash reserves are depleted. It is calculated as: Total Cash Balance divided by Net Monthly Burn (where Net Burn = Gross Operating Expenses minus Monthly Recurring Revenue). Top venture investors recommend maintaining at least 18 to 24 months of runway with a 20% safety margin for market volatility.'
+    },
+    {
+      question: 'What is Paul Graham\'s "Default Alive" framework?',
+      answer: 'In 2015, Y Combinator co-founder Paul Graham introduced "Default Alive vs Default Dead". A startup is Default Alive if its revenue will grow to surpass expenses before its cash reserves hit zero. If revenue growth is too slow to reach profitability before running out of cash, the startup is Default Dead and will perish unless it raises external funding or cuts burn immediately.'
+    },
+    {
+      question: 'What is a healthy CAC Payback Period for early-stage B2B SaaS?',
+      answer: 'CAC Payback Period is the number of months required to recover the cost of acquiring a customer (CAC / Monthly Gross Profit per Customer). An elite benchmark is under 12 months, allowing a company to self-fund its customer acquisition engine. A payback period of 12 to 18 months is acceptable, while over 24 months creates severe working capital constraints.'
+    },
+    {
+      question: 'How does the SaaS Rule of 40 work, and what is an elite score?',
+      answer: 'The Rule of 40 states that a software company\'s combined annual revenue growth rate percentage and free cash flow margin percentage should equal or exceed 40%. For example, a startup growing at 55% with a -10% cash burn margin scores 45%, qualifying as an elite venture-grade business that balances growth with capital efficiency.'
+    },
+    {
+      question: 'Why should founders apply a 15% employer tax buffer to salaries?',
+      answer: 'Base employee salaries do not reflect the true cost of headcount. Employers must pay mandatory state and federal employment taxes (FICA, Medicare, FUTA, SUTA), worker\'s compensation insurance, payroll processing software fees, and basic healthcare benefits. A 15% overhead multiplier (Salary x 1.15) provides an accurate operational forecast.'
+    },
+    {
+      question: 'How do venture capitalists calculate ARR valuation multiples in 2026/2027?',
+      answer: 'In modern venture markets, enterprise software valuations are primarily determined as a multiple of Annual Recurring Revenue (ARR). Median private B2B SaaS multiples range between 6x and 9x ARR. However, companies exceeding the Rule of 40 with net dollar retention over 120% command premium multiples of 12x to 20x ARR.'
+    }
+  ];
+  function generateFAQSchema() {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': FOUNDER_FAQS.map(faq => ({
+        '@type': 'Question',
+        'name': faq.question,
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': faq.answer
+        }
+      }))
     };
   }
   
@@ -1664,15 +1956,15 @@
 
   // --- MODULE: js/utils/exporter.js ---
   /**
-   * 1-Click Executive PDF and CSV Report Generator
+   * 1-Click Executive PDF Board Report & CSV Financial Model Generator
    */
-  function exportRunwayToCSV(runwayResult) {
+  function exportRunwayToCSV(runwayResult, currency = '$') {
     if (!runwayResult || !runwayResult.monthlyProjections) {
       alert('No projection data available to export.');
       return;
     }
   
-    const headers = ['Month', 'Revenue ($)', 'Payroll ($)', 'OpEx ($)', 'Gross Burn ($)', 'Net Burn ($)', 'Ending Cash ($)', 'Status'];
+    const headers = ['Month', `Revenue (${currency})`, `Payroll (${currency})`, `OpEx (${currency})`, `Gross Burn (${currency})`, `Net Burn (${currency})`, `Ending Cash (${currency})`, 'Status'];
     const rows = runwayResult.monthlyProjections.map(p => [
       `Month ${p.month}`,
       p.revenue,
@@ -1696,8 +1988,143 @@
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
-  function printExecutiveReport() {
-    window.print();
+  function prepareAndPrintBoardReport(companyName, runwayResult, unitEconomicsResult, headcount) {
+    const container = document.getElementById('executive-board-report');
+    if (!container || !runwayResult) {
+      window.print();
+      return;
+    }
+  
+    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const compName = (companyName || '').trim() || 'Tech Startup Inc.';
+  
+    const isAlive = runwayResult.isDefaultAlive;
+    const runwayText = formatMonths(runwayResult.runwayMonths);
+    const zeroDateText = runwayResult.zeroCashMonth ? `Month ${runwayResult.zeroCashMonth}` : 'Default Alive (Infinite)';
+  
+    let headcountRows = '';
+    if (Array.isArray(headcount)) {
+      headcountRows = headcount.map(h => `
+        <tr>
+          <td><strong>${h.role}</strong></td>
+          <td class="mono">${formatCurrency(h.monthlySalary)}/mo</td>
+          <td class="mono">Month ${h.startMonth}+</td>
+          <td class="mono">${formatCurrency(Math.round(h.monthlySalary * 1.15))}/mo</td>
+        </tr>
+      `).join('');
+    }
+  
+    let tableRows = '';
+    runwayResult.monthlyProjections.forEach(p => {
+      tableRows += `
+        <tr>
+          <td class="mono">M${p.month}</td>
+          <td class="mono">${formatCurrency(p.revenue)}</td>
+          <td class="mono">${formatCurrency(p.payroll)}</td>
+          <td class="mono">${formatCurrency(p.opex)}</td>
+          <td class="mono">${formatCurrency(p.grossBurn)}</td>
+          <td class="mono" style="color:${p.netBurn <= 0 ? '#059669' : '#DC2626'};">${formatCurrency(p.netBurn)}</td>
+          <td class="mono" style="font-weight:700;">${formatCurrency(p.endingCash)}</td>
+          <td>${p.isBankrupt ? 'Bankrupt' : p.isProfitable ? 'Profitable' : 'Burning'}</td>
+        </tr>
+      `;
+    });
+  
+    let diagNotes = '';
+    if (unitEconomicsResult && Array.isArray(unitEconomicsResult.diagnosis)) {
+      diagNotes = unitEconomicsResult.diagnosis.map(d => `<li><strong>${d.metric}:</strong> ${d.text}</li>`).join('');
+    }
+  
+    container.innerHTML = `
+      <div class="print-report-wrapper">
+        <div class="print-header">
+          <div>
+            <h1 style="font-size:22px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:0.5px;">Executive Board Financial Memorandum</h1>
+            <p style="font-size:12px; color:#64748B; margin-top:2px;">CONFIDENTIAL • PREPARED FOR INVESTORS & DIRECTORS</p>
+          </div>
+          <div style="text-align:right;">
+            <strong style="font-size:16px; color:#059669;">${compName}</strong>
+            <p style="font-size:11px; color:#64748B;">Audit Date: ${dateStr}</p>
+          </div>
+        </div>
+  
+        <div class="print-kpi-grid">
+          <div class="print-kpi-box">
+            <span class="print-kpi-lbl">Runway Remaining</span>
+            <strong class="print-kpi-val" style="color:${isAlive ? '#059669' : '#DC2626'};">${runwayText}</strong>
+            <span style="font-size:10px; color:#64748B;">Zero-Cash: ${zeroDateText}</span>
+          </div>
+          <div class="print-kpi-box">
+            <span class="print-kpi-lbl">Baseline Net Burn</span>
+            <strong class="print-kpi-val">${formatCurrency(runwayResult.initialNetBurn)}/mo</strong>
+            <span style="font-size:10px; color:#64748B;">Gross: ${formatCurrency(runwayResult.monthlyProjections[0]?.grossBurn || 0)}</span>
+          </div>
+          <div class="print-kpi-box">
+            <span class="print-kpi-lbl">LTV : CAC Ratio</span>
+            <strong class="print-kpi-val" style="color:#059669;">${unitEconomicsResult?.ltvCacRatio || 'N/A'}x</strong>
+            <span style="font-size:10px; color:#64748B;">Payback: ${unitEconomicsResult?.paybackMonths || 'N/A'} mos</span>
+          </div>
+          <div class="print-kpi-box">
+            <span class="print-kpi-lbl">Rule of 40 Score</span>
+            <strong class="print-kpi-val" style="color:#059669;">${unitEconomicsResult?.ruleOf40Score || 'N/A'}%</strong>
+            <span style="font-size:10px; color:#64748B;">Growth + FCF Margin</span>
+          </div>
+        </div>
+  
+        <div style="margin-top:20px;">
+          <h3 style="font-size:13px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #CBD5E1; padding-bottom:4px; margin-bottom:8px;">Hiring & Compensation Matrix (+15% Tax Overhead)</h3>
+          <table class="print-data-table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Base Salary</th>
+                <th>Start Month</th>
+                <th>Fully-Loaded Monthly Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${headcountRows}
+            </tbody>
+          </table>
+        </div>
+  
+        <div style="margin-top:20px;">
+          <h3 style="font-size:13px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #CBD5E1; padding-bottom:4px; margin-bottom:8px;">Unit Economics Evaluation & Strategic Recommendations</h3>
+          <ul style="font-size:11px; color:#334155; line-height:1.6; padding-left:18px;">
+            ${diagNotes}
+          </ul>
+        </div>
+  
+        <div style="margin-top:20px; page-break-before:auto;">
+          <h3 style="font-size:13px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #CBD5E1; padding-bottom:4px; margin-bottom:8px;">36-Month Financial Ledger</h3>
+          <table class="print-data-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Revenue</th>
+                <th>Payroll</th>
+                <th>OpEx</th>
+                <th>Gross Burn</th>
+                <th>Net Burn</th>
+                <th>Ending Cash</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+  
+        <div class="print-footer">
+          <p>Generated by Budof Operational Finance Suite (budof.com) • Confidential Internal Document</p>
+        </div>
+      </div>
+    `;
+  
+    setTimeout(() => {
+      window.print();
+    }, 100);
   }
   
 
@@ -1716,10 +2143,17 @@
   
   
   
+  
+  
+  
+  
+  
   // --- State Variables ---
   let chartRenderer = null;
   let currentRunwayResult = null;
+  let currentUnitEconomicsResult = null;
   let activePresetKey = 'bootstrapped_profitable';
+  let companyName = 'Acme Software Inc.';
   
   const soundEngine = new SoundEngine();
   const tycoon = new TycoonGame();
@@ -1728,16 +2162,56 @@
   
   // --- Initialization ---
   document.addEventListener('DOMContentLoaded', () => {
+    setupCompanyAndCurrency();
     setupNavigation();
     setupPresets();
     setupRunwaySimulator();
     setupUnitEconomics();
     setupPricingCalculator();
+    setupFounderCalculators();
     setupBenchmarksAndValuation();
+    setupPerksDirectory();
+    setupFAQAccordion();
     setupTycoonSimulator();
     setupExportAndLegal();
     handleUrlHash();
   });
+  
+  // --- Company Name & Currency Selector ---
+  function setupCompanyAndCurrency() {
+    const inputComp = document.getElementById('input-company-name');
+    const selectCurr = document.getElementById('select-currency');
+  
+    if (typeof localStorage !== 'undefined') {
+      const savedName = localStorage.getItem('budof_company_name');
+      if (savedName) companyName = savedName;
+      const savedCurr = localStorage.getItem('budof_currency');
+      if (savedCurr) setCurrency(savedCurr);
+    }
+  
+    if (inputComp) {
+      inputComp.value = companyName;
+      inputComp.addEventListener('input', (e) => {
+        companyName = e.target.value;
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('budof_company_name', companyName);
+        }
+      });
+    }
+  
+    if (selectCurr) {
+      selectCurr.value = getCurrency();
+      selectCurr.addEventListener('change', (e) => {
+        setCurrency(e.target.value);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('budof_currency', e.target.value);
+        }
+        triggerRunwayUpdate();
+        triggerUnitEconomicsUpdate();
+        triggerCalculatorsUpdate();
+      });
+    }
+  }
   
   // --- Tab Navigation & Hash Routing ---
   function switchTab(targetId) {
@@ -1755,7 +2229,6 @@
       setTimeout(() => chartRenderer.render(), 50);
     }
   
-    // Update URL hash cleanly without page reload
     try {
       const cleanHash = targetId.replace('tab-', '');
       if (window.location.hash.slice(1) !== cleanHash) {
@@ -1865,10 +2338,13 @@
     if (banner) {
       banner.innerHTML = `Loaded Verified Financial Template: <strong>${preset.name}</strong> (${preset.tagline})`;
     }
+  
+    triggerCalculatorsUpdate();
   }
   
   let triggerRunwayUpdate = () => {};
   let triggerUnitEconomicsUpdate = () => {};
+  let triggerCalculatorsUpdate = () => {};
   
   // --- MODULE 1: RUNWAY SIMULATOR ---
   function setupRunwaySimulator() {
@@ -1906,6 +2382,15 @@
         headcount: headcountData,
         horizonMonths: 36
       });
+  
+      // Save to localStorage
+      if (typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem('budof_model_params', JSON.stringify({
+            startingCash, currentMRR, monthlyGrowth, monthlyOpEx, headcountData
+          }));
+        } catch {}
+      }
   
       // Update KPIs
       const kpiRunway = document.getElementById('kpi-runway-months');
@@ -1945,6 +2430,9 @@
   
       // Populate Data Table
       renderRunwayTable(currentRunwayResult.monthlyProjections);
+  
+      // Refresh dynamic calculators
+      triggerCalculatorsUpdate();
     }
   
     triggerRunwayUpdate = update;
@@ -2055,7 +2543,7 @@
       displayGM.textContent = `${gm}%`;
       displayChurn.textContent = `${churn.toFixed(1)}%`;
   
-      const result = calculateUnitEconomics({
+      currentUnitEconomicsResult = calculateUnitEconomics({
         cac,
         arpu,
         grossMarginPct: gm,
@@ -2065,6 +2553,8 @@
         annualGrowthRatePct: Number(inputGrowth.value),
         fcfMarginPct: Number(inputFCF.value)
       });
+  
+      const result = currentUnitEconomicsResult;
   
       // Update KPI UI
       const kpiLTVCAC = document.getElementById('kpi-ltv-cac');
@@ -2146,7 +2636,7 @@
         annualAdoptionPct: adoption
       });
   
-      document.getElementById('pricing-blended-arpu').textContent = `$${result.blendedEffectiveARPU}`;
+      document.getElementById('pricing-blended-arpu').textContent = `${getCurrency()}${result.blendedEffectiveARPU}`;
       document.getElementById('pricing-mrr').textContent = formatCurrency(result.mrr);
       document.getElementById('pricing-arr').textContent = `${formatCurrency(result.arr)} ARR`;
       document.getElementById('pricing-upfront-cash').textContent = formatCurrency(result.upfrontAnnualCash);
@@ -2168,6 +2658,93 @@
     }
   
     [inputCust, inputStarter, inputPro, inputEnterprise, sliderDiscount, sliderAdoption].forEach(el => {
+      if (el) el.addEventListener('input', update);
+    });
+  
+    update();
+  }
+  
+  // --- MODULE: HIGH-INTENT FOUNDER CALCULATORS ---
+  function setupFounderCalculators() {
+    // 1. Fundraising Target
+    const sliderMonths = document.getElementById('calc-target-months');
+    const sliderBuffer = document.getElementById('calc-safety-buffer');
+    const displayTargetMonths = document.getElementById('display-target-months');
+    const displaySafetyBuffer = document.getElementById('display-safety-buffer');
+  
+    // 2. Cap Table Dilution
+    const inputPreMoney = document.getElementById('calc-pre-money');
+    const inputInvestment = document.getElementById('calc-investment');
+    const inputOptionPool = document.getElementById('calc-option-pool');
+  
+    // 3. Hiring Impact
+    const inputSalary = document.getElementById('calc-new-salary');
+  
+    function update() {
+      const netBurn = Math.abs(currentRunwayResult?.initialNetBurn || 15000);
+      const months = Number(sliderMonths?.value || 18);
+      const buffer = Number(sliderBuffer?.value || 20);
+  
+      if (displayTargetMonths) displayTargetMonths.textContent = `${months} mos`;
+      if (displaySafetyBuffer) displaySafetyBuffer.textContent = `${buffer}%`;
+  
+      const fundResult = calculateFundraisingTarget({
+        targetRunwayMonths: months,
+        netMonthlyBurn: netBurn,
+        safetyBufferPct: buffer
+      });
+  
+      const elTotalRaise = document.getElementById('calc-res-total-raise');
+      const elRoundTier = document.getElementById('calc-res-round-tier');
+      const elImpliedPost = document.getElementById('calc-res-implied-post');
+  
+      if (elTotalRaise) elTotalRaise.textContent = formatCurrency(fundResult.totalTargetToRaise);
+      if (elRoundTier) elRoundTier.textContent = `${fundResult.roundTier} (~${fundResult.typicalDilutionPct}% Dilution)`;
+      if (elImpliedPost) elImpliedPost.textContent = formatCurrency(fundResult.impliedPostMoney);
+  
+      // Dilution update
+      const pre = Number(inputPreMoney?.value || 4000000);
+      const inv = Number(inputInvestment?.value || 1000000);
+      const opt = Number(inputOptionPool?.value || 10);
+  
+      const dilResult = calculateEquityDilution({
+        preMoneyValuation: pre,
+        investmentAmount: inv,
+        optionPoolPct: opt,
+        founderCount: 2
+      });
+  
+      const elPostVal = document.getElementById('calc-res-post-val');
+      const elFounderEq = document.getElementById('calc-res-founder-eq');
+      const elInvestorEq = document.getElementById('calc-res-investor-eq');
+  
+      if (elPostVal) elPostVal.textContent = formatCurrency(dilResult.postMoney);
+      if (elFounderEq) elFounderEq.textContent = `${dilResult.founderEquityPct}% (${dilResult.equityPerFounder}% / co-founder)`;
+      if (elInvestorEq) elInvestorEq.textContent = `${dilResult.investorOwnershipPct}% (+${dilResult.optionPoolPct}% Option Pool)`;
+  
+      // Hiring impact update
+      const salary = Number(inputSalary?.value || 7500);
+      const baseParams = {
+        startingCash: Number(document.getElementById('input-starting-cash')?.value || 180000),
+        currentMRR: Number(document.getElementById('input-current-mrr')?.value || 42000),
+        monthlyGrowthRate: Number(document.getElementById('input-growth-rate')?.value || 5) / 100,
+        monthlyOpEx: Number(document.getElementById('input-monthly-opex')?.value || 6500),
+        headcount: headcountData
+      };
+  
+      const hireResult = calculateHiringImpact(baseParams, { monthlySalary: salary });
+  
+      const elRunwayLost = document.getElementById('calc-res-runway-lost');
+      const elLoadedCost = document.getElementById('calc-res-loaded-cost');
+      const elBreakevenMRR = document.getElementById('calc-res-breakeven-mrr');
+  
+      if (elRunwayLost) elRunwayLost.textContent = typeof hireResult.runwayMonthsLost === 'number' ? `-${hireResult.runwayMonthsLost} months` : hireResult.runwayMonthsLost;
+      if (elLoadedCost) elLoadedCost.textContent = `${formatCurrency(hireResult.fullyLoadedMonthlyCost)}/mo`;
+      if (elBreakevenMRR) elBreakevenMRR.textContent = `+${formatCurrency(hireResult.requiredMRRToBreakeven)} MRR`;
+    }
+  
+    triggerCalculatorsUpdate = update;
+    [sliderMonths, sliderBuffer, inputPreMoney, inputInvestment, inputOptionPool, inputSalary].forEach(el => {
       if (el) el.addEventListener('input', update);
     });
   
@@ -2217,6 +2794,60 @@
     });
   
     updateValuation();
+  }
+  
+  // --- MODULE: FOUNDER PERKS DIRECTORY ---
+  function setupPerksDirectory() {
+    const container = document.getElementById('perks-grid-container');
+    if (!container) return;
+  
+    container.innerHTML = '';
+    FOUNDER_PERKS.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'perk-card';
+      card.innerHTML = `
+        <div>
+          <div class="perk-header">
+            <span class="perk-partner">${p.partner}</span>
+            <span class="perk-badge">${p.badge}</span>
+          </div>
+          <div class="perk-offer">${p.offer}</div>
+          <p class="perk-desc">${p.description}</p>
+        </div>
+        <div class="perk-footer">
+          <span class="perk-value mono">${p.value}</span>
+          <a href="${p.url}" target="_blank" rel="noopener sponsored" class="btn-primary" style="font-size:11px; padding:6px 12px; text-decoration:none;">${p.cta}</a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+  
+  // --- MODULE: FAQ ACCORDION ---
+  function setupFAQAccordion() {
+    const container = document.getElementById('faqs-accordion-container');
+    if (!container) return;
+  
+    container.innerHTML = '';
+    FOUNDER_FAQS.forEach((faq, idx) => {
+      const item = document.createElement('div');
+      item.className = `faq-item ${idx === 0 ? 'open' : ''}`;
+      item.innerHTML = `
+        <button class="faq-question">
+          <span>${faq.question}</span>
+          <span style="font-size:16px; font-weight:700;">+</span>
+        </button>
+        <div class="faq-answer">${faq.answer}</div>
+      `;
+  
+      item.querySelector('.faq-question').addEventListener('click', () => {
+        item.classList.toggle('open');
+        const icon = item.querySelector('.faq-question span:last-child');
+        icon.textContent = item.classList.contains('open') ? '−' : '+';
+      });
+  
+      container.appendChild(item);
+    });
   }
   
   // --- MODULE 4: STARTUP TYCOON SIMULATOR ---
@@ -2289,7 +2920,6 @@
       displayMarketing.textContent = formatCurrency(tycoon.budget.marketing);
       displayRD.textContent = formatCurrency(tycoon.budget.rAndD);
   
-      // Update cap table summary
       const elFounderEq = document.getElementById('cap-founder-equity');
       const elInvestorEq = document.getElementById('cap-investor-equity');
       if (elFounderEq) elFounderEq.textContent = `${100 - tycoon.equityDilutionPct}%`;
@@ -2444,12 +3074,12 @@
   function setupExportAndLegal() {
     document.getElementById('btn-export-csv')?.addEventListener('click', () => {
       if (currentRunwayResult) {
-        exportRunwayToCSV(currentRunwayResult);
+        exportRunwayToCSV(currentRunwayResult, getCurrency());
       }
     });
   
     document.getElementById('btn-print-report')?.addEventListener('click', () => {
-      printExecutiveReport();
+      prepareAndPrintBoardReport(companyName, currentRunwayResult, currentUnitEconomicsResult, headcountData);
     });
   
     const legalModal = document.getElementById('legal-modal-overlay');

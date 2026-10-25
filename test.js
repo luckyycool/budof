@@ -9,8 +9,13 @@ import { formatCurrency, formatCompactCurrency, formatPercent, formatMonths } fr
 import { calculateRunway, TAX_BENEFITS_MULTIPLIER } from './js/engine/runway-simulator.js';
 import { calculateUnitEconomics } from './js/engine/unit-economics.js';
 import { calculatePricingTiers } from './js/engine/pricing-calculator.js';
+import { calculateFundraisingTarget } from './js/engine/fundraising-calculator.js';
+import { calculateEquityDilution } from './js/engine/dilution-calculator.js';
+import { calculateHiringImpact } from './js/engine/hiring-impact-calculator.js';
 import { INDUSTRY_PRESETS } from './js/engine/presets.js';
 import { SAAS_BENCHMARKS, calculateSaaSValuation } from './js/engine/valuation.js';
+import { FOUNDER_PERKS } from './js/engine/deals.js';
+import { FOUNDER_FAQS, generateFAQSchema } from './js/engine/faqs.js';
 import { SoundEngine } from './js/engine/audio.js';
 import { TycoonGame } from './js/engine/tycoon-game.js';
 import { STARTUP_EVENTS } from './js/engine/tycoon-events.js';
@@ -192,6 +197,71 @@ test('SaaS Benchmarks: Verified industry percentiles', () => {
   assert.ok(val.valuationBull > val.valuationBase);
 });
 
+// 7. Founder Calculators Tests
+test('Founder Calculators: Fundraising target calculation', () => {
+  const result = calculateFundraisingTarget({
+    targetRunwayMonths: 18,
+    netMonthlyBurn: 20000,
+    safetyBufferPct: 20
+  });
+
+  // Baseline = 18 * 20000 = 360000. Buffer = 360000 * 0.2 = 72000. Total = 432000.
+  assert.strictEqual(result.baselineCapitalNeeded, 360000);
+  assert.strictEqual(result.safetyBufferAmount, 72000);
+  assert.strictEqual(result.totalTargetToRaise, 432000);
+  assert.strictEqual(result.roundTier, 'Late Angel / Pre-Seed');
+  assert.ok(result.impliedPostMoney > result.totalTargetToRaise);
+});
+
+test('Founder Calculators: Cap table equity dilution', () => {
+  const result = calculateEquityDilution({
+    preMoneyValuation: 4000000,
+    investmentAmount: 1000000,
+    optionPoolPct: 10,
+    founderCount: 2
+  });
+
+  // Post-Money = 5M. Investor = 1M / 5M = 20%.
+  // Founder equity = (1 - 0.20) * (100 - 10) = 0.8 * 90 = 72.0%.
+  assert.strictEqual(result.postMoney, 5000000);
+  assert.strictEqual(result.investorOwnershipPct, 20);
+  assert.strictEqual(result.founderEquityPct, 72);
+  assert.strictEqual(result.equityPerFounder, 36);
+  assert.strictEqual(result.valuePerOnePercent, 50000);
+});
+
+test('Founder Calculators: Hiring runway impact calculation', () => {
+  const baseParams = {
+    startingCash: 100000,
+    currentMRR: 5000,
+    monthlyGrowthRate: 0,
+    monthlyOpEx: 2000,
+    headcount: [{ id: '1', role: 'Dev', monthlySalary: 5000, startMonth: 1 }]
+  };
+
+  const result = calculateHiringImpact(baseParams, { monthlySalary: 6000 });
+  // Fully loaded cost = 6000 * 1.15 = 6900
+  assert.strictEqual(result.fullyLoadedMonthlyCost, 6900);
+  assert.strictEqual(result.requiredMRRToBreakeven, 6900);
+  assert.ok(result.runwayMonthsLost > 0, 'Runway months lost must be positive');
+});
+
+// 8. Founder Perks & FAQs Tests
+test('Founder Perks & FAQs: Directory and Schema validation', () => {
+  assert.strictEqual(FOUNDER_PERKS.length, 6);
+  for (const p of FOUNDER_PERKS) {
+    assert.ok(p.id);
+    assert.ok(p.partner);
+    assert.ok(p.url.startsWith('https://'));
+    assert.ok(p.value);
+  }
+
+  assert.strictEqual(FOUNDER_FAQS.length, 6);
+  const schema = generateFAQSchema();
+  assert.strictEqual(schema['@type'], 'FAQPage');
+  assert.strictEqual(schema.mainEntity.length, 6);
+});
+
 // 7. Procedural Sound Engine Tests
 test('Sound Engine: Methods defined for UI & Tycoon audio feedback', () => {
   const sound = new SoundEngine();
@@ -298,6 +368,7 @@ test('Static Assets: index.html has complete metadata, presets, schema & bundle 
   assert.ok(html.includes('id="runway-canvas"'), 'Must include canvas element');
   assert.ok(html.includes('id="presets-pills-bar"'), 'Must include presets pills element');
   assert.ok(html.includes('src="bundle.js"'), 'Must link to self-contained bundle.js for file:/// support');
+  assert.ok(html.includes('ca-pub-0897820292119776'), 'Must include AdSense verification script');
 });
 
 test('Static Assets: Compiled bundle.js exists and is valid', () => {

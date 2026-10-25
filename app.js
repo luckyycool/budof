@@ -3,21 +3,28 @@
  * High-performance, reactive financial simulation suite.
  */
 
-import { formatCurrency, formatCompactCurrency, formatPercent, formatMonths, formatNumber } from './js/utils/formatters.js';
+import { formatCurrency, formatCompactCurrency, formatPercent, formatMonths, formatNumber, setCurrency, getCurrency } from './js/utils/formatters.js';
 import { calculateRunway } from './js/engine/runway-simulator.js';
 import { calculateUnitEconomics } from './js/engine/unit-economics.js';
 import { calculatePricingTiers } from './js/engine/pricing-calculator.js';
+import { calculateFundraisingTarget } from './js/engine/fundraising-calculator.js';
+import { calculateEquityDilution } from './js/engine/dilution-calculator.js';
+import { calculateHiringImpact } from './js/engine/hiring-impact-calculator.js';
 import { INDUSTRY_PRESETS } from './js/engine/presets.js';
 import { SAAS_BENCHMARKS, calculateSaaSValuation } from './js/engine/valuation.js';
+import { FOUNDER_PERKS } from './js/engine/deals.js';
+import { FOUNDER_FAQS } from './js/engine/faqs.js';
 import { SoundEngine } from './js/engine/audio.js';
 import { TycoonGame } from './js/engine/tycoon-game.js';
 import { FinancialChartRenderer } from './js/engine/chart-renderer.js';
-import { exportRunwayToCSV, printExecutiveReport } from './js/utils/exporter.js';
+import { exportRunwayToCSV, prepareAndPrintBoardReport } from './js/utils/exporter.js';
 
 // --- State Variables ---
 let chartRenderer = null;
 let currentRunwayResult = null;
+let currentUnitEconomicsResult = null;
 let activePresetKey = 'bootstrapped_profitable';
+let companyName = 'Acme Software Inc.';
 
 const soundEngine = new SoundEngine();
 const tycoon = new TycoonGame();
@@ -26,16 +33,56 @@ let headcountData = JSON.parse(JSON.stringify(INDUSTRY_PRESETS.bootstrapped_prof
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+  setupCompanyAndCurrency();
   setupNavigation();
   setupPresets();
   setupRunwaySimulator();
   setupUnitEconomics();
   setupPricingCalculator();
+  setupFounderCalculators();
   setupBenchmarksAndValuation();
+  setupPerksDirectory();
+  setupFAQAccordion();
   setupTycoonSimulator();
   setupExportAndLegal();
   handleUrlHash();
 });
+
+// --- Company Name & Currency Selector ---
+function setupCompanyAndCurrency() {
+  const inputComp = document.getElementById('input-company-name');
+  const selectCurr = document.getElementById('select-currency');
+
+  if (typeof localStorage !== 'undefined') {
+    const savedName = localStorage.getItem('budof_company_name');
+    if (savedName) companyName = savedName;
+    const savedCurr = localStorage.getItem('budof_currency');
+    if (savedCurr) setCurrency(savedCurr);
+  }
+
+  if (inputComp) {
+    inputComp.value = companyName;
+    inputComp.addEventListener('input', (e) => {
+      companyName = e.target.value;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('budof_company_name', companyName);
+      }
+    });
+  }
+
+  if (selectCurr) {
+    selectCurr.value = getCurrency();
+    selectCurr.addEventListener('change', (e) => {
+      setCurrency(e.target.value);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('budof_currency', e.target.value);
+      }
+      triggerRunwayUpdate();
+      triggerUnitEconomicsUpdate();
+      triggerCalculatorsUpdate();
+    });
+  }
+}
 
 // --- Tab Navigation & Hash Routing ---
 function switchTab(targetId) {
@@ -53,7 +100,6 @@ function switchTab(targetId) {
     setTimeout(() => chartRenderer.render(), 50);
   }
 
-  // Update URL hash cleanly without page reload
   try {
     const cleanHash = targetId.replace('tab-', '');
     if (window.location.hash.slice(1) !== cleanHash) {
@@ -163,10 +209,13 @@ function applyPreset(key) {
   if (banner) {
     banner.innerHTML = `Loaded Verified Financial Template: <strong>${preset.name}</strong> (${preset.tagline})`;
   }
+
+  triggerCalculatorsUpdate();
 }
 
 let triggerRunwayUpdate = () => {};
 let triggerUnitEconomicsUpdate = () => {};
+let triggerCalculatorsUpdate = () => {};
 
 // --- MODULE 1: RUNWAY SIMULATOR ---
 function setupRunwaySimulator() {
@@ -204,6 +253,15 @@ function setupRunwaySimulator() {
       headcount: headcountData,
       horizonMonths: 36
     });
+
+    // Save to localStorage
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('budof_model_params', JSON.stringify({
+          startingCash, currentMRR, monthlyGrowth, monthlyOpEx, headcountData
+        }));
+      } catch {}
+    }
 
     // Update KPIs
     const kpiRunway = document.getElementById('kpi-runway-months');
@@ -243,6 +301,9 @@ function setupRunwaySimulator() {
 
     // Populate Data Table
     renderRunwayTable(currentRunwayResult.monthlyProjections);
+
+    // Refresh dynamic calculators
+    triggerCalculatorsUpdate();
   }
 
   triggerRunwayUpdate = update;
@@ -353,7 +414,7 @@ function setupUnitEconomics() {
     displayGM.textContent = `${gm}%`;
     displayChurn.textContent = `${churn.toFixed(1)}%`;
 
-    const result = calculateUnitEconomics({
+    currentUnitEconomicsResult = calculateUnitEconomics({
       cac,
       arpu,
       grossMarginPct: gm,
@@ -363,6 +424,8 @@ function setupUnitEconomics() {
       annualGrowthRatePct: Number(inputGrowth.value),
       fcfMarginPct: Number(inputFCF.value)
     });
+
+    const result = currentUnitEconomicsResult;
 
     // Update KPI UI
     const kpiLTVCAC = document.getElementById('kpi-ltv-cac');
@@ -444,7 +507,7 @@ function setupPricingCalculator() {
       annualAdoptionPct: adoption
     });
 
-    document.getElementById('pricing-blended-arpu').textContent = `$${result.blendedEffectiveARPU}`;
+    document.getElementById('pricing-blended-arpu').textContent = `${getCurrency()}${result.blendedEffectiveARPU}`;
     document.getElementById('pricing-mrr').textContent = formatCurrency(result.mrr);
     document.getElementById('pricing-arr').textContent = `${formatCurrency(result.arr)} ARR`;
     document.getElementById('pricing-upfront-cash').textContent = formatCurrency(result.upfrontAnnualCash);
@@ -466,6 +529,93 @@ function setupPricingCalculator() {
   }
 
   [inputCust, inputStarter, inputPro, inputEnterprise, sliderDiscount, sliderAdoption].forEach(el => {
+    if (el) el.addEventListener('input', update);
+  });
+
+  update();
+}
+
+// --- MODULE: HIGH-INTENT FOUNDER CALCULATORS ---
+function setupFounderCalculators() {
+  // 1. Fundraising Target
+  const sliderMonths = document.getElementById('calc-target-months');
+  const sliderBuffer = document.getElementById('calc-safety-buffer');
+  const displayTargetMonths = document.getElementById('display-target-months');
+  const displaySafetyBuffer = document.getElementById('display-safety-buffer');
+
+  // 2. Cap Table Dilution
+  const inputPreMoney = document.getElementById('calc-pre-money');
+  const inputInvestment = document.getElementById('calc-investment');
+  const inputOptionPool = document.getElementById('calc-option-pool');
+
+  // 3. Hiring Impact
+  const inputSalary = document.getElementById('calc-new-salary');
+
+  function update() {
+    const netBurn = Math.abs(currentRunwayResult?.initialNetBurn || 15000);
+    const months = Number(sliderMonths?.value || 18);
+    const buffer = Number(sliderBuffer?.value || 20);
+
+    if (displayTargetMonths) displayTargetMonths.textContent = `${months} mos`;
+    if (displaySafetyBuffer) displaySafetyBuffer.textContent = `${buffer}%`;
+
+    const fundResult = calculateFundraisingTarget({
+      targetRunwayMonths: months,
+      netMonthlyBurn: netBurn,
+      safetyBufferPct: buffer
+    });
+
+    const elTotalRaise = document.getElementById('calc-res-total-raise');
+    const elRoundTier = document.getElementById('calc-res-round-tier');
+    const elImpliedPost = document.getElementById('calc-res-implied-post');
+
+    if (elTotalRaise) elTotalRaise.textContent = formatCurrency(fundResult.totalTargetToRaise);
+    if (elRoundTier) elRoundTier.textContent = `${fundResult.roundTier} (~${fundResult.typicalDilutionPct}% Dilution)`;
+    if (elImpliedPost) elImpliedPost.textContent = formatCurrency(fundResult.impliedPostMoney);
+
+    // Dilution update
+    const pre = Number(inputPreMoney?.value || 4000000);
+    const inv = Number(inputInvestment?.value || 1000000);
+    const opt = Number(inputOptionPool?.value || 10);
+
+    const dilResult = calculateEquityDilution({
+      preMoneyValuation: pre,
+      investmentAmount: inv,
+      optionPoolPct: opt,
+      founderCount: 2
+    });
+
+    const elPostVal = document.getElementById('calc-res-post-val');
+    const elFounderEq = document.getElementById('calc-res-founder-eq');
+    const elInvestorEq = document.getElementById('calc-res-investor-eq');
+
+    if (elPostVal) elPostVal.textContent = formatCurrency(dilResult.postMoney);
+    if (elFounderEq) elFounderEq.textContent = `${dilResult.founderEquityPct}% (${dilResult.equityPerFounder}% / co-founder)`;
+    if (elInvestorEq) elInvestorEq.textContent = `${dilResult.investorOwnershipPct}% (+${dilResult.optionPoolPct}% Option Pool)`;
+
+    // Hiring impact update
+    const salary = Number(inputSalary?.value || 7500);
+    const baseParams = {
+      startingCash: Number(document.getElementById('input-starting-cash')?.value || 180000),
+      currentMRR: Number(document.getElementById('input-current-mrr')?.value || 42000),
+      monthlyGrowthRate: Number(document.getElementById('input-growth-rate')?.value || 5) / 100,
+      monthlyOpEx: Number(document.getElementById('input-monthly-opex')?.value || 6500),
+      headcount: headcountData
+    };
+
+    const hireResult = calculateHiringImpact(baseParams, { monthlySalary: salary });
+
+    const elRunwayLost = document.getElementById('calc-res-runway-lost');
+    const elLoadedCost = document.getElementById('calc-res-loaded-cost');
+    const elBreakevenMRR = document.getElementById('calc-res-breakeven-mrr');
+
+    if (elRunwayLost) elRunwayLost.textContent = typeof hireResult.runwayMonthsLost === 'number' ? `-${hireResult.runwayMonthsLost} months` : hireResult.runwayMonthsLost;
+    if (elLoadedCost) elLoadedCost.textContent = `${formatCurrency(hireResult.fullyLoadedMonthlyCost)}/mo`;
+    if (elBreakevenMRR) elBreakevenMRR.textContent = `+${formatCurrency(hireResult.requiredMRRToBreakeven)} MRR`;
+  }
+
+  triggerCalculatorsUpdate = update;
+  [sliderMonths, sliderBuffer, inputPreMoney, inputInvestment, inputOptionPool, inputSalary].forEach(el => {
     if (el) el.addEventListener('input', update);
   });
 
@@ -515,6 +665,60 @@ function setupBenchmarksAndValuation() {
   });
 
   updateValuation();
+}
+
+// --- MODULE: FOUNDER PERKS DIRECTORY ---
+function setupPerksDirectory() {
+  const container = document.getElementById('perks-grid-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  FOUNDER_PERKS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'perk-card';
+    card.innerHTML = `
+      <div>
+        <div class="perk-header">
+          <span class="perk-partner">${p.partner}</span>
+          <span class="perk-badge">${p.badge}</span>
+        </div>
+        <div class="perk-offer">${p.offer}</div>
+        <p class="perk-desc">${p.description}</p>
+      </div>
+      <div class="perk-footer">
+        <span class="perk-value mono">${p.value}</span>
+        <a href="${p.url}" target="_blank" rel="noopener sponsored" class="btn-primary" style="font-size:11px; padding:6px 12px; text-decoration:none;">${p.cta}</a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// --- MODULE: FAQ ACCORDION ---
+function setupFAQAccordion() {
+  const container = document.getElementById('faqs-accordion-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  FOUNDER_FAQS.forEach((faq, idx) => {
+    const item = document.createElement('div');
+    item.className = `faq-item ${idx === 0 ? 'open' : ''}`;
+    item.innerHTML = `
+      <button class="faq-question">
+        <span>${faq.question}</span>
+        <span style="font-size:16px; font-weight:700;">+</span>
+      </button>
+      <div class="faq-answer">${faq.answer}</div>
+    `;
+
+    item.querySelector('.faq-question').addEventListener('click', () => {
+      item.classList.toggle('open');
+      const icon = item.querySelector('.faq-question span:last-child');
+      icon.textContent = item.classList.contains('open') ? '−' : '+';
+    });
+
+    container.appendChild(item);
+  });
 }
 
 // --- MODULE 4: STARTUP TYCOON SIMULATOR ---
@@ -587,7 +791,6 @@ function setupTycoonSimulator() {
     displayMarketing.textContent = formatCurrency(tycoon.budget.marketing);
     displayRD.textContent = formatCurrency(tycoon.budget.rAndD);
 
-    // Update cap table summary
     const elFounderEq = document.getElementById('cap-founder-equity');
     const elInvestorEq = document.getElementById('cap-investor-equity');
     if (elFounderEq) elFounderEq.textContent = `${100 - tycoon.equityDilutionPct}%`;
@@ -742,12 +945,12 @@ function setupTycoonSimulator() {
 function setupExportAndLegal() {
   document.getElementById('btn-export-csv')?.addEventListener('click', () => {
     if (currentRunwayResult) {
-      exportRunwayToCSV(currentRunwayResult);
+      exportRunwayToCSV(currentRunwayResult, getCurrency());
     }
   });
 
   document.getElementById('btn-print-report')?.addEventListener('click', () => {
-    printExecutiveReport();
+    prepareAndPrintBoardReport(companyName, currentRunwayResult, currentUnitEconomicsResult, headcountData);
   });
 
   const legalModal = document.getElementById('legal-modal-overlay');
