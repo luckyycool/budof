@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budof — Startup Runway & Burn Rate Simulator | SaaS Unit Economics & Tycoon Game</title>
+  <meta name="description" content="Free, 100% in-browser startup runway simulator, SaaS unit economics calculator (CAC, LTV, Magic Number, Rule of 40), and 24-month startup tycoon business simulation.">
+  <meta name="keywords" content="startup runway calculator, burn rate simulator, saas unit economics, cac payback period, ltv cac calculator, magic number saas, rule of 40, startup tycoon game">
+  <link rel="canonical" href="https://budof.com/">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://budof.com/">
+  <meta property="og:title" content="Budof — Startup Runway & Financial Simulation Suite">
+  <meta property="og:description" content="Model 36-month startup burn, SaaS unit economics, and test your founder skills in the 24-month Startup Tycoon game. Free, zero registration.">
+  <meta property="og:site_name" content="Budof">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Budof — Startup Runway & SaaS Financial Modeling">
+  <meta name="twitter:description" content="Calculate your zero-cash date, LTV:CAC, and test your founder survival in the browser.">
+
+  <!-- Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Budof Operational Finance Suite",
+    "url": "https://budof.com/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Interactive startup runway calculator, SaaS unit economics engine, and turn-based startup tycoon simulation game."
+  }
+  </script>
+</head>
+<body>
+
+  <!-- App Header (Two-Tier Swiss Daylight Layout) -->
+  <header class="app-header">
+    <div class="header-top">
+      <a href="https://budof.com/" class="brand-wrapper">
+        <div class="brand-logo-mark">B</div>
+        <div class="brand-text">
+          <h1>BUDOF <span class="brand-pill">FINTECH SUITE</span></h1>
+          <p class="brand-tagline">Business Unit Dynamics & Operational Finance</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button id="btn-export-csv" class="btn-secondary" title="Download 36-Month Model as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button id="btn-print-report" class="btn-primary" title="Print or Save Executive PDF Deck">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Executive PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (Tier 2) -->
+    <nav class="header-nav-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <button class="nav-tab-btn active" data-tab="tab-runway">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Runway & Burn Forecaster
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-unit-economics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          SaaS Unit Economics (CAC/LTV)
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-pricing">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Tier Pricing & MRR Elasticity
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-tycoon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
+          Startup Tycoon Simulator
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Top Ad Slot (Fixed 728x90, CLS = 0) -->
+  <div class="main-content" style="padding-bottom: 0;">
+    <div class="ad-slot-leaderboard" id="ad-top-slot">
+      <span>Sponsored Financial Solutions • 728x90 Advertisement Slot (Google AdSense)</span>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- TAB 1: RUNWAY & BURN FORECASTER -->
+    <section id="tab-runway" class="tab-panel active">
+      <div class="workbench-grid">
+        
+        <!-- Sidebar Controls -->
+        <aside class="sidebar-controls">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Runway Parameters</h3>
+              <span class="card-subtitle">Real-time dynamic model</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-starting-cash" class="form-label">Starting Cash Reserve</label>
+                <span id="display-starting-cash" class="form-val-display mono">$250,000</span>
+              </div>
+              <input type="range" id="input-starting-cash" class="range-slider" min="10000" max="2000000" step="10000" value="250000">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-current-mrr" class="form-label">Current MRR</label>
+                <span id="display-current-mrr" class="form-val-display mono">$10,000</span>
+              </div>
+              <input type="range" id="input-current-mrr" class="range-slider" min="0" max="150000" step="1000" value="10000">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-growth-rate" class="form-label">Monthly MRR Growth</label>
+                <span id="display-growth-rate" class="form-val-display mono">8.0%</span>
+              </div>
+              <input type="range" id="input-growth-rate" class="range-slider" min="-10" max="40" step="0.5" value="8.0">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-monthly-opex" class="form-label">Base OpEx (Software & Cloud)</label>
+                <span id="display-monthly-opex" class="form-val-display mono">$4,000</span>
+              </div>
+              <input type="range" id="input-monthly-opex" class="range-slider" min="500" max="35000" step="500" value="4000">
+            </div>
+          </div>
+
+          <!-- Headcount Roadmap Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Hiring Roadmap</h3>
+              <span class="card-subtitle">+15% payroll tax buffer</span>
+            </div>
+
+            <div id="headcount-list">
+              <!-- Dynamically rendered rows -->
+            </div>
+
+            <div style="margin-top: 14px; display: flex; gap: 8px;">
+              <input type="text" id="new-hire-role" placeholder="Role (e.g. Frontend Dev)" class="input-num" style="font-size: 12px; flex: 1;">
+              <input type="number" id="new-hire-salary" placeholder="$ / Mo" class="input-num" style="width: 80px; font-size: 12px;" value="6000">
+              <button id="btn-add-hire" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">+ Add</button>
+            </div>
+          </div>
+
+          <!-- Ad Unit in Sidebar (300x250 CLS = 0) -->
+          <div class="ad-slot-rectangle">
+            <span>Sidebar Financial Ad (300x250)</span>
+          </div>
+        </aside>
+
+        <!-- Main Runway Dashboard -->
+        <div class="workbench-main">
+          
+          <!-- Key KPI Cards -->
+          <div class="kpi-row">
+            <div class="kpi-card highlight">
+              <div class="kpi-label">Runway Remaining</div>
+              <div id="kpi-runway-months" class="kpi-value green mono">18.4 mos</div>
+              <div id="kpi-runway-subtext" class="kpi-subtext">Estimated Zero-Cash Date</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Current Net Burn</div>
+              <div id="kpi-net-burn" class="kpi-value crimson mono">-$11,250</div>
+              <div class="kpi-subtext">Gross Burn minus Revenue</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Breakeven Status</div>
+              <div id="kpi-breakeven-status" class="kpi-value mono" style="font-size: 20px;">Month 14</div>
+              <div id="kpi-breakeven-subtext" class="kpi-subtext">Revenue crosses Burn</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Survival State</div>
+              <div id="kpi-default-alive" class="kpi-value green mono" style="font-size: 19px;">Default Alive</div>
+              <div class="kpi-subtext">Paul Graham's Equation</div>
+            </div>
+          </div>
+
+          <!-- Canvas Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="card-title">36-Month Cash Reserve & Breakeven Trajectory</h3>
+                <p class="card-subtitle">Interactive 60-FPS Canvas • Hover across points for detailed financial breakdown</p>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot cash"></span> Cash Reserve</span>
+                <span class="legend-item"><span class="legend-dot rev"></span> Revenue (MRR)</span>
+                <span class="legend-item"><span class="legend-dot burn"></span> Gross Burn</span>
+              </div>
+            </div>
+
+            <div class="canvas-wrapper">
+              <canvas id="runway-canvas" class="canvas-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- High-Ticket Affiliate Partner Card (Mercury / Brex Treasury) -->
+          <div class="partner-ad-card">
+            <div class="partner-ad-content">
+              <span class="partner-ad-badge">Founder Recommendation</span>
+              <h4 class="partner-ad-title">Extend Your Runway: Earn 4.5%–5.0% APY on Idle Startup Cash</h4>
+              <p class="partner-ad-desc">Open a dedicated FDIC-insured startup treasury account with Mercury or Brex. Automated zero-fee wire transfers and founder credit cards.</p>
+            </div>
+            <a href="https://mercury.com/" target="_blank" rel="noopener sponsored" class="partner-ad-btn">Open Free Account ➔</a>
+          </div>
+
+          <!-- 36-Month Data Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Detailed 36-Month Projections</h3>
+              <span class="card-subtitle">Month-by-month financial ledger</span>
+            </div>
+            <div class="headcount-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Revenue</th>
+                    <th>Payroll</th>
+                    <th>OpEx</th>
+                    <th>Gross Burn</th>
+                    <th>Net Burn</th>
+                    <th>Ending Cash</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="projection-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SAAS UNIT ECONOMICS (CAC / LTV) -->
+    <section id="tab-unit-economics" class="tab-panel">
+      <div class="workbench-grid">
+        
+        <!-- Unit Economics Inputs -->
+        <aside class="sidebar-controls">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Unit Metrics</h3>
+              <span class="card-subtitle">Acquisition & Retention</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-cac" class="form-label">CAC (Blended Cost)</label>
+                <span id="display-cac" class="form-val-display mono">$500</span>
+              </div>
+              <input type="range" id="input-cac" class="range-slider" min="50" max="5000" step="50" value="500">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-arpu" class="form-label">Monthly ARPU</label>
+                <span id="display-arpu" class="form-val-display mono">$80</span>
+              </div>
+              <input type="range" id="input-arpu" class="range-slider" min="10" max="1500" step="10" value="80">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-gross-margin" class="form-label">Gross Margin %</label>
+                <span id="display-gross-margin" class="form-val-display mono">80%</span>
+              </div>
+              <input type="range" id="input-gross-margin" class="range-slider" min="20" max="95" step="1" value="80">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-churn-rate" class="form-label">Monthly Churn Rate %</label>
+                <span id="display-churn-rate" class="form-val-display mono">2.5%</span>
+              </div>
+              <input type="range" id="input-churn-rate" class="range-slider" min="0.5" max="15" step="0.1" value="2.5">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Efficiency Drivers</h3>
+              <span class="card-subtitle">Venture Grade Formulas</span>
+            </div>
+
+            <div class="form-group">
+              <label for="input-sm-spend" class="form-label">Quarterly S&M Spend ($)</label>
+              <input type="number" id="input-sm-spend" class="input-num" value="45000">
+            </div>
+
+            <div class="form-group">
+              <label for="input-net-arr" class="form-label">Net New ARR Added ($)</label>
+              <input type="number" id="input-net-arr" class="input-num" value="60000">
+            </div>
+
+            <div class="form-group">
+              <label for="input-annual-growth" class="form-label">Annual Revenue Growth %</label>
+              <input type="number" id="input-annual-growth" class="input-num" value="55">
+            </div>
+
+            <div class="form-group">
+              <label for="input-fcf-margin" class="form-label">Free Cash Flow Margin %</label>
+              <input type="number" id="input-fcf-margin" class="input-num" value="-5">
+            </div>
+          </div>
+        </aside>
+
+        <!-- Unit Economics Results -->
+        <div class="workbench-main">
+          
+          <div class="kpi-row">
+            <div class="kpi-card highlight">
+              <div class="kpi-label">LTV : CAC Ratio</div>
+              <div id="kpi-ltv-cac" class="kpi-value green mono">5.12x</div>
+              <div class="kpi-subtext">Benchmark: &gt;3.0x is Healthy</div>
+            </div>
+
+            <div class="kpi-card highlight">
+              <div class="kpi-label">CAC Payback Period</div>
+              <div id="kpi-payback-months" class="kpi-value green mono">7.8 mos</div>
+              <div class="kpi-subtext">Benchmark: &lt;12 mos is Elite</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Customer Lifetime Value</div>
+              <div id="kpi-ltv-val" class="kpi-value mono">$2,560</div>
+              <div id="kpi-lifetime-subtext" class="kpi-subtext">Avg 40.0 months lifespan</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Magic Number</div>
+              <div id="kpi-magic-number" class="kpi-value green mono">1.33</div>
+              <div class="kpi-subtext">Sales Efficiency Indicator</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Rule of 40 Score</div>
+              <div id="kpi-rule-of-40" class="kpi-value green mono">50.0%</div>
+              <div id="kpi-rule-subtext" class="kpi-subtext">Elite Venture Benchmark Met</div>
+            </div>
+          </div>
+
+          <!-- Diagnosis Cards -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Algorithmic Health Diagnosis & Actionable Insights</h3>
+              <span class="card-subtitle">Automated unit economics evaluation</span>
+            </div>
+
+            <div id="unit-diagnosis-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- B2B Partner Affiliate Card (Payroll & Benefits) -->
+          <div class="partner-ad-card">
+            <div class="partner-ad-content">
+              <span class="partner-ad-badge">HR & Compliance</span>
+              <h4 class="partner-ad-title">Automate Global Payroll, Contractor Invoices & Benefits</h4>
+              <p class="partner-ad-desc">Gusto and Deel eliminate international tax headaches, compliance risks, and health insurance onboarding. Get $100–$300 onboarding bonus.</p>
+            </div>
+            <a href="https://gusto.com/" target="_blank" rel="noopener sponsored" class="partner-ad-btn">Explore Gusto ➔</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: TIER PRICING & MRR ELASTICITY -->
+    <section id="tab-pricing" class="tab-panel">
+      <div class="workbench-grid">
+        
+        <aside class="sidebar-controls">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Pricing Setup</h3>
+              <span class="card-subtitle">Tier elasticity inputs</span>
+            </div>
+
+            <div class="form-group">
+              <label for="pricing-total-customers" class="form-label">Total Paying Customers</label>
+              <input type="number" id="pricing-total-customers" class="input-num" value="350">
+            </div>
+
+            <div class="form-group">
+              <label for="pricing-starter-price" class="form-label">Starter Tier Price ($/mo)</label>
+              <input type="number" id="pricing-starter-price" class="input-num" value="29">
+            </div>
+
+            <div class="form-group">
+              <label for="pricing-pro-price" class="form-label">Pro Tier Price ($/mo)</label>
+              <input type="number" id="pricing-pro-price" class="input-num" value="79">
+            </div>
+
+            <div class="form-group">
+              <label for="pricing-enterprise-price" class="form-label">Enterprise Tier Price ($/mo)</label>
+              <input type="number" id="pricing-enterprise-price" class="input-num" value="299">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="pricing-annual-discount" class="form-label">Annual Discount %</label>
+                <span id="display-annual-discount" class="form-val-display mono">20%</span>
+              </div>
+              <input type="range" id="pricing-annual-discount" class="range-slider" min="0" max="40" step="5" value="20">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="pricing-annual-adoption" class="form-label">Annual Billing Adoption %</label>
+                <span id="display-annual-adoption" class="form-val-display mono">35%</span>
+              </div>
+              <input type="range" id="pricing-annual-adoption" class="range-slider" min="0" max="80" step="5" value="35">
+            </div>
+          </div>
+        </aside>
+
+        <div class="workbench-main">
+          
+          <div class="kpi-row">
+            <div class="kpi-card highlight">
+              <div class="kpi-label">Blended ARPU</div>
+              <div id="pricing-blended-arpu" class="kpi-value green mono">$71.00</div>
+              <div class="kpi-subtext">Average revenue per account</div>
+            </div>
+
+            <div class="kpi-card highlight">
+              <div class="kpi-label">Monthly Recurring Revenue</div>
+              <div id="pricing-mrr" class="kpi-value mono">$22,862</div>
+              <div id="pricing-arr" class="kpi-subtext mono">$274,344 ARR</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Upfront Annual Cash</div>
+              <div id="pricing-upfront-cash" class="kpi-value green mono">$83,498</div>
+              <div class="kpi-subtext">Immediate upfront runway boost</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Estimated Churn Reduction</div>
+              <div id="pricing-churn-reduction" class="kpi-value green mono">-19.0%</div>
+              <div class="kpi-subtext">Due to annual contract lock-in</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Customer Distribution by Tier</h3>
+              <span class="card-subtitle">Tier volume breakdown</span>
+            </div>
+
+            <div id="pricing-tiers-breakdown" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- B2B Partner Affiliate Card (Company Incorporation) -->
+          <div class="partner-ad-card">
+            <div class="partner-ad-content">
+              <span class="partner-ad-badge">Incorporation & Legal</span>
+              <h4 class="partner-ad-title">Incorporate Your Delaware C-Corp or LLC with Stripe Atlas</h4>
+              <p class="partner-ad-desc">Form your startup legal entity in 2 days, issue founder stock with 83(b) tax elections, and claim $50,000+ in AWS and Stripe fee credits.</p>
+            </div>
+            <a href="https://stripe.com/atlas" target="_blank" rel="noopener sponsored" class="partner-ad-btn">Claim Startup Credits ➔</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: STARTUP TYCOON SIMULATOR (24-MONTH GAME) -->
+    <section id="tab-tycoon" class="tab-panel">
+      
+      <!-- Tycoon Top HUD -->
+      <div class="tycoon-hud">
+        <div class="hud-tile">
+          <div class="hud-tile-title">Timeline</div>
+          <div id="tycoon-hud-month" class="hud-tile-val mono green">Month 1 / 24</div>
+        </div>
+
+        <div class="hud-tile">
+          <div class="hud-tile-title">Bank Balance</div>
+          <div id="tycoon-hud-cash" class="hud-tile-val mono green">$120,000</div>
+        </div>
+
+        <div class="hud-tile">
+          <div class="hud-tile-title">Monthly Revenue (MRR)</div>
+          <div id="tycoon-hud-mrr" class="hud-tile-val mono">$3,000</div>
+        </div>
+
+        <div class="hud-tile">
+          <div class="hud-tile-title">Net Monthly Burn</div>
+          <div id="tycoon-hud-burn" class="hud-tile-val mono crimson">-$7,550</div>
+        </div>
+
+        <div class="hud-tile">
+          <div class="hud-tile-title">Active Customers</div>
+          <div id="tycoon-hud-customers" class="hud-tile-val mono">60</div>
+        </div>
+
+        <div class="hud-tile">
+          <div class="hud-tile-title">Product Quality</div>
+          <div id="tycoon-hud-quality" class="hud-tile-val mono">65 / 100</div>
+        </div>
+      </div>
+
+      <div class="workbench-grid">
+        
+        <!-- Team & Budget Controls -->
+        <div>
+          <!-- Team Management -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Team Management</h3>
+              <span class="card-subtitle">Hire & deploy specialized talent</span>
+            </div>
+
+            <div class="team-grid">
+              <div class="team-card">
+                <div class="team-info">
+                  <h4>Founders</h4>
+                  <p>$2,500/mo salary draw</p>
+                </div>
+                <div class="team-controls">
+                  <span id="team-count-founders" class="team-count mono">2</span>
+                </div>
+              </div>
+
+              <div class="team-card">
+                <div class="team-info">
+                  <h4>Software Engineers</h4>
+                  <p>$5,000/mo • +Quality, -Churn</p>
+                </div>
+                <div class="team-controls">
+                  <button id="btn-fire-engineer" class="btn-counter">-</button>
+                  <span id="team-count-engineers" class="team-count mono">1</span>
+                  <button id="btn-hire-engineer" class="btn-counter">+</button>
+                </div>
+              </div>
+
+              <div class="team-card">
+                <div class="team-info">
+                  <h4>Growth Marketers</h4>
+                  <p>$4,000/mo • +Inbound Leads</p>
+                </div>
+                <div class="team-controls">
+                  <button id="btn-fire-marketer" class="btn-counter">-</button>
+                  <span id="team-count-marketers" class="team-count mono">0</span>
+                  <button id="btn-hire-marketer" class="btn-counter">+</button>
+                </div>
+              </div>
+
+              <div class="team-card">
+                <div class="team-info">
+                  <h4>Account Executives</h4>
+                  <p>$4,500/mo • +Conversion</p>
+                </div>
+                <div class="team-controls">
+                  <button id="btn-fire-sales" class="btn-counter">-</button>
+                  <span id="team-count-sales" class="team-count mono">0</span>
+                  <button id="btn-hire-sales" class="btn-counter">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly Discretionary Budgets -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Monthly Discretionary Spend</h3>
+              <span class="card-subtitle">Allocate working capital</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="tycoon-budget-marketing" class="form-label">Performance Marketing Budget</label>
+                <span id="display-tycoon-marketing" class="form-val-display mono">$1,000</span>
+              </div>
+              <input type="range" id="tycoon-budget-marketing" class="range-slider" min="0" max="15000" step="500" value="1000">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="tycoon-budget-rd" class="form-label">R&D & Cloud Tools Budget</label>
+                <span id="display-tycoon-rd" class="form-val-display mono">$1,000</span>
+              </div>
+              <input type="range" id="tycoon-budget-rd" class="range-slider" min="0" max="10000" step="500" value="1000">
+            </div>
+          </div>
+
+          <!-- Tycoon Action Bar -->
+          <div class="tycoon-actions-bar">
+            <button id="btn-reset-game" class="btn-secondary">Reset Journey</button>
+            <button id="btn-advance-month" class="btn-advance-turn">
+              Simulate Next Month ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Side: Venture Capital Pitching & Activity Log -->
+        <div>
+          <!-- Pitch Investors Panel -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Pitch Venture Capital & Angels</h3>
+              <span class="card-subtitle">Trade equity for growth capital</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <div>
+                  <strong style="font-size: 13px;">Angel Syndicate ($150,000 SAFE)</strong>
+                  <p style="font-size: 11px; color: var(--text-muted);">Dilutes 8% equity • Requires MRR &gt; $3,000</p>
+                </div>
+                <button id="btn-pitch-angel" class="btn-secondary" style="font-size: 12px;">Pitch Angels</button>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <div>
+                  <strong style="font-size: 13px;">Seed Round ($600,000 Investment)</strong>
+                  <p style="font-size: 11px; color: var(--text-muted);">Dilutes 15% equity • Requires MRR &gt; $15,000</p>
+                </div>
+                <button id="btn-pitch-seed" class="btn-secondary" style="font-size: 12px;">Pitch Seed VCs</button>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <div>
+                  <strong style="font-size: 13px;">Series A ($2,500,000 Institutional)</strong>
+                  <p style="font-size: 11px; color: var(--text-muted);">Dilutes 20% equity • Requires MRR &gt; $50,000</p>
+                </div>
+                <button id="btn-pitch-seriesa" class="btn-secondary" style="font-size: 12px;">Pitch Series A</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity & Event Feed -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Company Operations Log</h3>
+              <span class="card-subtitle">Monthly telemetry & event record</span>
+            </div>
+
+            <div id="tycoon-log-feed" class="log-feed">
+              <div class="log-item">🏁 Month 1: Founded business with $120,000 cash and 60 beta customers.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Tycoon Event Dilemma Modal -->
+  <div id="event-modal-overlay" class="modal-overlay">
+    <div class="modal-window">
+      <span id="event-modal-badge" class="modal-badge emerald">Market Incident</span>
+      <h3 id="event-modal-title" class="modal-title">Event Title</h3>
+      <p id="event-modal-body" class="modal-body">Description of dilemma.</p>
+
+      <div class="modal-choices">
+        <button id="btn-choice-0" class="btn-choice">
+          <div id="choice-title-0" class="choice-title">Option A</div>
+          <div id="choice-desc-0" class="choice-desc">Option A description</div>
+        </button>
+        <button id="btn-choice-1" class="btn-choice">
+          <div id="choice-title-1" class="choice-title">Option B</div>
+          <div id="choice-desc-1" class="choice-desc">Option B description</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legal / Compliance Modal -->
+  <div id="legal-modal-overlay" class="modal-overlay">
+    <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
+      <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
+      <div id="legal-modal-content" class="modal-body"></div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
+      </div>
+      <div class="footer-links">
+        <a href="#tab-runway" class="footer-tab-link" data-tab="tab-runway">Runway Calculator</a>
+        <a href="#tab-unit-economics" class="footer-tab-link" data-tab="tab-unit-economics">SaaS CAC/LTV</a>
+        <a href="#tab-tycoon" class="footer-tab-link" data-tab="tab-tycoon">Startup Game</a>
+        <a href="#" id="link-privacy">Privacy Policy</a>
+        <a href="#" id="link-terms">Terms of Use</a>
+        <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
