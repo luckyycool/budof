@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Runway Calculator &amp; 36-Month Burn Forecaster | Budof</title>
+  <meta name="description" content="Calculate your startup runway, gross vs net burn rate, zero-cash date, and Paul Graham's 'Default Alive' threshold with dynamic hiring roadmaps and real-time canvas visualizations.">
+  <meta name="keywords" content="startup runway calculator, burn rate forecaster, default alive calculator, net burn rate formula, 36-month cash forecast, startup hiring impact model, founder runway buffer">
+  <link rel="canonical" href="https://budof.com/runway-calculator/">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://budof.com/runway-calculator/">
+  <meta property="og:title" content="Startup Runway Calculator &amp; 36-Month Burn Forecaster | Budof">
+  <meta property="og:description" content="Model 36-month startup burn, hiring plans with 15% tax/benefits overhead, and calculate your exact zero-cash date or Default Alive status. 100% in-browser.">
+  <meta property="og:site_name" content="Budof">
+  <meta property="og:image" content="https://budof.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Startup Runway Calculator &amp; 36-Month Burn Forecaster | Budof">
+  <meta name="twitter:description" content="Free dynamic startup runway forecaster. Calculate zero-cash month, Net Burn, and hiring roadmap impacts.">
+  <meta name="twitter:image" content="https://budof.com/og-image.png">
+
+  <!-- Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles.css">
+
+  <!-- Google AdSense Verification & Runtime Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0897820292119776" crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Startup Runway Calculator & 36-Month Burn Forecaster",
+    "url": "https://budof.com/runway-calculator/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Dynamic startup runway forecaster modeling starting cash, MRR growth, OpEx, and hiring roadmap with +15% employer tax/benefits overhead to determine zero-cash date and Default Alive status."
+  }
+  </script>
+
+  <!-- JSON-LD Structured Data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How is startup runway calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Startup runway is calculated by dividing your total cash reserves by your monthly Net Burn rate. Net Burn equals Gross Operating Expenses (salaries, software, rent) minus Monthly Recurring Revenue (MRR). If a company has $500,000 cash and burns $25,000 net per month, it has 20 months of runway."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does Paul Graham mean by 'Default Alive'?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Paul Graham defined 'Default Alive' as a state where a startup's existing revenue growth rate will carry it to profitability before its cash reserves are depleted. Conversely, if expenses exceed future revenues at zero cash, the startup is 'Default Dead' and relies on additional VC fundraising to survive."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is a 15% employer tax and benefits buffer required for hiring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Base employee salaries do not reflect the true cost of headcount. Employers must pay mandatory payroll taxes (FICA, Medicare, FUTA, SUTA), healthcare contributions, workers' compensation insurance, and 401(k) matches. Adding a 15% multiplier ensures financial forecasts do not understate burn."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much runway should a seed-stage startup have?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Top venture capital firms recommend maintaining at least 18 to 24 months of runway following a Seed round, with an additional 3-month safety buffer to account for hiring delays or extended Series A fundraising cycles."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- App Header (Two-Tier Swiss Daylight Layout) -->
+  <header class="app-header">
+    <div class="header-top">
+      <a href="../" class="brand-wrapper" title="Budof Master Suite Hub">
+        <div class="brand-logo-mark">B</div>
+        <div class="brand-text">
+          <h1>BUDOF <span class="brand-pill">FINTECH SUITE</span></h1>
+          <p class="brand-tagline">Business Unit Dynamics &amp; Operational Finance</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button id="btn-export-csv" class="btn-secondary" title="Download 36-Month Model as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button id="btn-print-report" class="btn-primary" title="Print or Save Executive PDF Deck">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Executive PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (Tier 2) -->
+    <nav class="header-nav-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <a href="../" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Suite Hub
+        </a>
+        <a href="../runway-calculator/" class="nav-tab-btn active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Runway Forecaster
+        </a>
+        <a href="../saas-unit-economics/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          SaaS Unit Economics
+        </a>
+        <a href="../fundraising-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Founder Calculators
+        </a>
+        <a href="../saas-valuation/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          SaaS Benchmarks &amp; Valuation
+        </a>
+        <a href="../deals-perks/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+          Founder Perks &amp; Deals
+        </a>
+        <a href="../startup-tycoon/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
+          Startup Tycoon Simulator
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Top Sponsor & Ad Container (Fixed 728x90, CLS = 0) -->
+  <div class="main-content" style="padding-bottom: 0;">
+    <div class="ad-slot-leaderboard" id="ad-top-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-0897820292119776"
+           data-ad-slot="9812739102"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- Interactive Runway & Burn Forecaster Tool -->
+    <section id="tab-runway" class="tab-panel active">
+      
+      <!-- Company Name & Currency Selector Bar -->
+      <div class="company-bar-wrapper">
+        <div class="company-meta-left">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Company / Project:</span>
+          <input type="text" id="input-company-name" class="company-name-input" placeholder="Your Startup Name" value="Acme Software Inc.">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Currency:</span>
+          <select id="select-currency" class="currency-select" aria-label="Select Currency">
+            <option value="$">$ USD (US Dollar)</option>
+            <option value="€">€ EUR (Euro)</option>
+            <option value="£">£ GBP (British Pound)</option>
+            <option value="₹">₹ INR (Indian Rupee)</option>
+            <option value="C$">C$ CAD (Canadian Dollar)</option>
+            <option value="A$">A$ AUD (Australian Dollar)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Presets Bar (1-Click Real-World Models) -->
+      <div class="presets-bar-wrapper">
+        <div class="presets-label">⚡ 1-Click Industry Financial Models (Pre-Loaded Verified Benchmarks)</div>
+        <div id="presets-pills-bar" class="presets-pills-bar">
+          <!-- Populated dynamically via presets.js -->
+        </div>
+        <div id="preset-status-banner" class="preset-status-banner">
+          Loaded Verified Financial Template: <strong>Bootstrapped Default Alive</strong> (Lean Team • Profitable • Zero VC Dilution)
+        </div>
+      </div>
+
+      <div class="workbench-grid">
+        
+        <!-- Sidebar Controls -->
+        <aside class="sidebar-controls">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Runway Parameters</h3>
+              <span class="card-subtitle">Real-time dynamic model</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-starting-cash" class="form-label">Starting Cash Reserve</label>
+                <span id="display-starting-cash" class="form-val-display mono">$180,000</span>
+              </div>
+              <input type="range" id="input-starting-cash" class="range-slider" min="10000" max="3000000" step="10000" value="180000">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-current-mrr" class="form-label">Current MRR</label>
+                <span id="display-current-mrr" class="form-val-display mono">$42,000</span>
+              </div>
+              <input type="range" id="input-current-mrr" class="range-slider" min="0" max="250000" step="1000" value="42000">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-growth-rate" class="form-label">Monthly MRR Growth</label>
+                <span id="display-growth-rate" class="form-val-display mono">5.0%</span>
+              </div>
+              <input type="range" id="input-growth-rate" class="range-slider" min="-10" max="40" step="0.5" value="5.0">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-monthly-opex" class="form-label">Base OpEx (Software &amp; Cloud)</label>
+                <span id="display-monthly-opex" class="form-val-display mono">$6,500</span>
+              </div>
+              <input type="range" id="input-monthly-opex" class="range-slider" min="500" max="150000" step="500" value="6500">
+            </div>
+          </div>
+
+          <!-- Dynamic Headcount Roadmap Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Team Headcount &amp; Payroll</h3>
+              <span class="card-subtitle">+15% employer tax &amp; benefits buffer</span>
+            </div>
+
+            <div id="headcount-list" style="margin-bottom: 12px; max-height: 220px; overflow-y: auto;">
+              <!-- Populated dynamically via app.js -->
+            </div>
+
+            <div style="background: var(--bg-subtle); padding: 10px; border-radius: var(--radius-sm); border: 1px dashed var(--border-color);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">Add Planned Role</div>
+              <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                <input type="text" id="new-hire-role" placeholder="e.g. Senior Frontend" class="input-num" style="flex: 2; font-size: 12px;">
+                <input type="number" id="new-hire-salary" placeholder="$ / mo" value="6000" step="500" class="input-num" style="flex: 1; font-size: 12px;">
+              </div>
+              <button id="btn-add-hire" class="btn-primary" style="width: 100%; font-size: 11px; padding: 6px;">+ Add Hire to Forecast</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Chart & Projections Stage -->
+        <section class="stage-view">
+          
+          <!-- KPI Summary Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Projected Runway</div>
+              <div id="kpi-runway-months" class="kpi-value green mono">Default Alive (∞)</div>
+              <div id="kpi-runway-subtext" class="kpi-subtext">Infinite Runway (Profitable before zero)</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Current Net Burn</div>
+              <div id="kpi-net-burn" class="kpi-value green mono">$2,450/mo</div>
+              <div class="kpi-subtext">Gross OpEx minus Current MRR</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Cash Flow Breakeven</div>
+              <div id="kpi-breakeven-status" class="kpi-value green mono">Month 1</div>
+              <div class="kpi-subtext">When MRR exceeds monthly burn</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Founder Status</div>
+              <div id="kpi-default-alive" class="kpi-value green mono">Default Alive</div>
+              <div class="kpi-subtext">Paul Graham's YC Survival Framework</div>
+            </div>
+          </div>
+
+          <!-- HTML5 Retina Canvas Financial Chart -->
+          <div class="chart-container-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">36-Month Cash Balance &amp; Revenue Trajectory</h3>
+              <div style="display: flex; gap: 14px; font-size: 12px; color: var(--text-muted);">
+                <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #059669; border-radius: 2px;"></span> Cash Reserve</span>
+                <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #10B981; border-radius: 2px;"></span> Monthly MRR</span>
+                <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #DC2626; border-radius: 2px;"></span> Net Burn</span>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="runway-canvas" width="850" height="340"></canvas>
+            </div>
+          </div>
+
+          <!-- 36-Month Data Table -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h3 class="card-title">Monthly Cash Flow Projections Table</h3>
+              <span class="card-subtitle">Granular month-by-month financial ledger</span>
+            </div>
+            <div style="max-height: 280px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>MRR</th>
+                    <th>Payroll (+15%)</th>
+                    <th>OpEx</th>
+                    <th>Net Burn</th>
+                    <th>End Cash</th>
+                  </tr>
+                </thead>
+                <tbody id="projection-table-body">
+                  <!-- Populated dynamically via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- Deep SEO Content & Founder Guidance -->
+    <section class="seo-content-section">
+      <article class="seo-guide-container">
+        
+        <header class="seo-article-header">
+          <h2 class="seo-article-title">The Definitive Founder's Guide to Calculating Startup Runway &amp; Managing Net Burn Rate</h2>
+          <p class="seo-article-lead">Startup runway is the single most vital metric determining whether an early-stage company reaches its next valuation inflection point or faces catastrophic insolvency. In this guide, we break down the exact mathematics, tax burdens, and growth frameworks required to steer your company toward Default Alive status.</p>
+        </header>
+
+        <h3 class="seo-h2">1. The Mathematical Runway Formula</h3>
+        <p class="seo-p">At its core, runway measures the number of months a startup can sustain operations before its liquid cash balance drops to zero. While many founders use a simplified estimate, an institutional financial model calculates runway by accounting for dynamic revenue expansion and staged headcount additions:</p>
+
+        <div class="formula-box">
+          <div class="formula-label">Basic Net Burn Formula</div>
+          Net Burn = Gross Operating Expenses (Payroll + Software + Hosting + Rent) − Monthly Recurring Revenue (MRR)
+          <br><br>
+          <div class="formula-label">Dynamic Runway Horizon Formula</div>
+          Runway (Months) = Total Liquid Cash Balance ÷ Average Monthly Net Burn
+        </div>
+
+        <p class="seo-p">When Net Burn is negative (MRR exceeds Gross OpEx), the company generates positive monthly free cash flow. In this scenario, mathematically the company has infinite runway and is <strong>Default Alive</strong>.</p>
+
+        <h3 class="seo-h2">2. Gross Burn vs. Net Burn: Understanding the Critical Difference</h3>
+        <p class="seo-p">Venture capitalists scrutinize both Gross Burn and Net Burn during Series A and Series B due diligence:</p>
+        <ul style="margin-left: 24px; margin-bottom: 16px; font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
+          <li><strong>Gross Burn:</strong> The absolute total dollar amount leaving your bank account each month, regardless of incoming customer revenue. If your payroll is $40,000, AWS bill is $5,000, and software SaaS seats are $3,000, your Gross Burn is $48,000/month.</li>
+          <li><strong>Net Burn:</strong> The actual deficit between incoming cash collections and gross expenses. If your Gross Burn is $48,000 and your MRR is $28,000, your Net Burn is $20,000/month.</li>
+        </ul>
+
+        <h3 class="seo-h2">3. The Hidden 15% Employer Payroll Tax &amp; Benefit Overhead</h3>
+        <p class="seo-p">One of the most frequent reasons founders run out of cash 3 to 5 months earlier than projected is failing to model <strong>fully-loaded payroll costs</strong>. When you hire an engineer at a base salary of $10,000 per month ($120,000/year), your company actually spends approximately $11,500 per month ($138,000/year):</p>
+        
+        <table class="benchmark-data-table">
+          <thead>
+            <tr>
+              <th>Payroll Component</th>
+              <th>Typical % Burden</th>
+              <th>Impact on $10k/mo Salary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Employer FICA (Social Security 6.2% + Medicare 1.45%)</td>
+              <td>7.65%</td>
+              <td>+$765 / month</td>
+            </tr>
+            <tr>
+              <td>Federal &amp; State Unemployment (FUTA / SUTA)</td>
+              <td>1.50% – 3.00%</td>
+              <td>+$150 – $300 / month</td>
+            </tr>
+            <tr>
+              <td>Workers' Comp &amp; Payroll Processing Software</td>
+              <td>1.00% – 2.00%</td>
+              <td>+$100 – $200 / month</td>
+            </tr>
+            <tr>
+              <td>Health, Dental &amp; Benefits Contributions</td>
+              <td>3.00% – 5.00%</td>
+              <td>+$300 – $500 / month</td>
+            </tr>
+            <tr style="background: var(--bg-subtle); font-weight: 700;">
+              <td>Total Loaded Burden Multiplier</td>
+              <td><strong>+15.0% Multiplier</strong></td>
+              <td><strong>$11,500 / month fully-loaded</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="seo-h2">4. Paul Graham's "Default Alive vs. Default Dead" Framework</h3>
+        <p class="seo-p">In his seminal 2015 essay, Y Combinator co-founder Paul Graham urged founders to ask a single, blunt question as soon as they have revenue: <em>"Are we Default Alive or Default Dead?"</em></p>
+        
+        <div class="guide-step-grid">
+          <div class="guide-step-card">
+            <div class="guide-step-num">✓</div>
+            <h4>Default Alive</h4>
+            <p>At your current month-over-month revenue growth rate, your MRR will surpass your expenses before your cash runs out. You control your own destiny and can negotiate fundraising terms from a position of sovereign strength.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num" style="background: #DC2626;">!</div>
+            <h4>Default Dead</h4>
+            <p>Even with historical revenue growth, your cash reserves will reach zero before profitability. Unless you accelerate growth, cut discretionary burn, or secure outside equity investment, the company will dissolve.</p>
+          </div>
+        </div>
+
+        <h3 class="seo-h2">5. Recommended Runway Benchmarks by Funding Stage</h3>
+        <table class="benchmark-data-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Recommended Runway</th>
+              <th>Target Milestones Prior to Next Round</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Pre-Seed</strong></td>
+              <td>12 – 18 Months</td>
+              <td>Working MVP, 10–20 reference design partners, verified ICP demand.</td>
+            </tr>
+            <tr>
+              <td><strong>Seed</strong></td>
+              <td>18 – 24 Months</td>
+              <td>$30k–$80k MRR, sub-12 month CAC payback, high retention cohort curves.</td>
+            </tr>
+            <tr>
+              <td><strong>Series A</strong></td>
+              <td>24 – 30 Months</td>
+              <td>$1.5M–$3M ARR, 115%+ Net Revenue Retention, predictable outbound GTM engine.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="seo-h2">Frequently Asked Questions</h3>
+        <div class="faq-item open">
+          <button class="faq-question">
+            <span>How does revenue growth impact my zero-cash date?</span>
+            <span style="font-size:16px; font-weight:700;">−</span>
+          </button>
+          <div class="faq-answer">Even modest compounding revenue growth (e.g. 5% to 8% month-over-month) significantly flattens your Net Burn curve. In a 36-month model, compounding MRR can delay a zero-cash cliff by 8 to 14 months compared to a static zero-growth model, often providing enough breathing room to reach profitability.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>What happens when runway drops below 6 months?</span>
+            <span style="font-size:16px; font-weight:700;">+</span>
+          </button>
+          <div class="faq-answer">Entering the sub-6 month danger zone triggers severe fundraising friction. Institutional venture rounds typically take 3 to 6 months from initial partner introduction to legal document signing and wire transfer. When VCs smell desperation, round valuations collapse and term sheet conditions become onerous. Founders should initiate fundraising when they still have 9 to 12 months of clean runway.</div>
+        </div>
+
+      </article>
+    </section>
+
+  </main>
+
+  <!-- Legal & Compliance Modal -->
+  <div id="legal-modal-overlay" class="modal-overlay">
+    <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
+      <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
+      <div id="legal-modal-content" class="modal-body"></div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
+      </div>
+      <div class="footer-links">
+        <a href="../" class="footer-tab-link">Suite Hub</a>
+        <a href="../runway-calculator/" class="footer-tab-link" style="color:var(--emerald-primary); font-weight:700;">Runway Calculator</a>
+        <a href="../saas-unit-economics/" class="footer-tab-link">SaaS CAC/LTV</a>
+        <a href="../fundraising-calculator/" class="footer-tab-link">Founder Calculators</a>
+        <a href="../saas-valuation/" class="footer-tab-link">SaaS Benchmarks</a>
+        <a href="../deals-perks/" class="footer-tab-link">Founder Perks</a>
+        <a href="../startup-tycoon/" class="footer-tab-link">Startup Game</a>
+        <a href="#" id="link-privacy">Privacy Policy</a>
+        <a href="#" id="link-terms">Terms of Use</a>
+        <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Self-contained production bundle (Executes under both file:/// and https://) -->
+  <script src="../bundle.js"></script>
+</body>
+</html>

@@ -2251,14 +2251,21 @@
     const footerTabLinks = document.querySelectorAll('.footer-tab-link');
   
     tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      btn.addEventListener('click', (e) => {
+        if (btn.dataset.tab && document.getElementById(btn.dataset.tab)) {
+          e.preventDefault();
+          switchTab(btn.dataset.tab);
+        }
+      });
     });
   
     footerTabLinks.forEach(link => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchTab(link.dataset.tab);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (link.dataset.tab && document.getElementById(link.dataset.tab)) {
+          e.preventDefault();
+          switchTab(link.dataset.tab);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       });
     });
   
@@ -2358,6 +2365,10 @@
     const sliderGrowth = document.getElementById('input-growth-rate');
     const sliderOpEx = document.getElementById('input-monthly-opex');
   
+    if (!sliderCash || !sliderMRR || !sliderGrowth || !sliderOpEx) {
+      return;
+    }
+  
     const displayCash = document.getElementById('display-starting-cash');
     const displayMRR = document.getElementById('display-current-mrr');
     const displayGrowth = document.getElementById('display-growth-rate');
@@ -2369,10 +2380,10 @@
       const monthlyGrowth = Number(sliderGrowth.value) / 100;
       const monthlyOpEx = Number(sliderOpEx.value);
   
-      displayCash.textContent = formatCurrency(startingCash);
-      displayMRR.textContent = formatCurrency(currentMRR);
-      displayGrowth.textContent = formatPercent(Number(sliderGrowth.value), 1);
-      displayOpEx.textContent = formatCurrency(monthlyOpEx);
+      if (displayCash) displayCash.textContent = formatCurrency(startingCash);
+      if (displayMRR) displayMRR.textContent = formatCurrency(currentMRR);
+      if (displayGrowth) displayGrowth.textContent = formatPercent(Number(sliderGrowth.value), 1);
+      if (displayOpEx) displayOpEx.textContent = formatCurrency(monthlyOpEx);
   
       currentRunwayResult = calculateRunway({
         startingCash,
@@ -2399,28 +2410,29 @@
       const kpiBreakeven = document.getElementById('kpi-breakeven-status');
       const kpiDefaultAlive = document.getElementById('kpi-default-alive');
   
-      kpiRunway.textContent = formatMonths(currentRunwayResult.runwayMonths);
-      if (currentRunwayResult.isDefaultAlive) {
-        kpiRunway.className = 'kpi-value green mono';
-        kpiRunwaySub.textContent = 'Infinite Runway (Profitable before zero)';
-        kpiDefaultAlive.textContent = 'Default Alive';
-        kpiDefaultAlive.className = 'kpi-value green mono';
-      } else {
-        kpiRunway.className = currentRunwayResult.runwayMonths <= 6 ? 'kpi-value crimson mono' : 'kpi-value mono';
-        kpiRunwaySub.textContent = currentRunwayResult.zeroCashMonth ? `Zero Cash at Month ${currentRunwayResult.zeroCashMonth}` : 'Depletes within horizon';
-        kpiDefaultAlive.textContent = 'Default Dead';
-        kpiDefaultAlive.className = 'kpi-value crimson mono';
+      if (kpiRunway) {
+        kpiRunway.textContent = formatMonths(currentRunwayResult.runwayMonths);
+        kpiRunway.className = currentRunwayResult.isDefaultAlive ? 'kpi-value green mono' : currentRunwayResult.runwayMonths <= 6 ? 'kpi-value crimson mono' : 'kpi-value mono';
       }
-  
-      kpiNetBurn.textContent = formatCurrency(currentRunwayResult.initialNetBurn);
-      kpiNetBurn.className = currentRunwayResult.initialNetBurn <= 0 ? 'kpi-value green mono' : 'kpi-value crimson mono';
-  
-      if (currentRunwayResult.breakevenMonth) {
-        kpiBreakeven.textContent = `Month ${currentRunwayResult.breakevenMonth}`;
-        kpiBreakeven.className = 'kpi-value green mono';
-      } else {
-        kpiBreakeven.textContent = 'Beyond M36';
-        kpiBreakeven.className = 'kpi-value mono';
+      if (kpiRunwaySub) {
+        kpiRunwaySub.textContent = currentRunwayResult.isDefaultAlive ? 'Infinite Runway (Profitable before zero)' : currentRunwayResult.zeroCashMonth ? `Zero Cash at Month ${currentRunwayResult.zeroCashMonth}` : 'Depletes within horizon';
+      }
+      if (kpiDefaultAlive) {
+        kpiDefaultAlive.textContent = currentRunwayResult.isDefaultAlive ? 'Default Alive' : 'Default Dead';
+        kpiDefaultAlive.className = currentRunwayResult.isDefaultAlive ? 'kpi-value green mono' : 'kpi-value crimson mono';
+      }
+      if (kpiNetBurn) {
+        kpiNetBurn.textContent = formatCurrency(currentRunwayResult.initialNetBurn);
+        kpiNetBurn.className = currentRunwayResult.initialNetBurn <= 0 ? 'kpi-value green mono' : 'kpi-value crimson mono';
+      }
+      if (kpiBreakeven) {
+        if (currentRunwayResult.breakevenMonth) {
+          kpiBreakeven.textContent = `Month ${currentRunwayResult.breakevenMonth}`;
+          kpiBreakeven.className = 'kpi-value green mono';
+        } else {
+          kpiBreakeven.textContent = 'Beyond M36';
+          kpiBreakeven.className = 'kpi-value mono';
+        }
       }
   
       // Chart update
@@ -2522,6 +2534,10 @@
     const sliderGM = document.getElementById('input-gross-margin');
     const sliderChurn = document.getElementById('input-churn-rate');
   
+    if (!sliderCAC || !sliderARPU || !sliderGM || !sliderChurn) {
+      return;
+    }
+  
     const inputSMSpend = document.getElementById('input-sm-spend');
     const inputNetARR = document.getElementById('input-net-arr');
     const inputGrowth = document.getElementById('input-annual-growth');
@@ -2538,20 +2554,20 @@
       const gm = Number(sliderGM.value);
       const churn = Number(sliderChurn.value);
   
-      displayCAC.textContent = formatCurrency(cac);
-      displayARPU.textContent = formatCurrency(arpu);
-      displayGM.textContent = `${gm}%`;
-      displayChurn.textContent = `${churn.toFixed(1)}%`;
+      if (displayCAC) displayCAC.textContent = formatCurrency(cac);
+      if (displayARPU) displayARPU.textContent = formatCurrency(arpu);
+      if (displayGM) displayGM.textContent = `${gm}%`;
+      if (displayChurn) displayChurn.textContent = `${churn.toFixed(1)}%`;
   
       currentUnitEconomicsResult = calculateUnitEconomics({
         cac,
         arpu,
         grossMarginPct: gm,
         monthlyChurnPct: churn,
-        salesMarketingSpend: Number(inputSMSpend.value),
-        netNewARRQuarter: Number(inputNetARR.value),
-        annualGrowthRatePct: Number(inputGrowth.value),
-        fcfMarginPct: Number(inputFCF.value)
+        salesMarketingSpend: Number(inputSMSpend?.value || 15000),
+        netNewARRQuarter: Number(inputNetARR?.value || 25000),
+        annualGrowthRatePct: Number(inputGrowth?.value || 45),
+        fcfMarginPct: Number(inputFCF?.value || -10)
       });
   
       const result = currentUnitEconomicsResult;
@@ -2565,31 +2581,45 @@
       const kpiRule40 = document.getElementById('kpi-rule-of-40');
       const kpiRuleSub = document.getElementById('kpi-rule-subtext');
   
-      kpiLTVCAC.textContent = `${result.ltvCacRatio}x`;
-      kpiLTVCAC.className = result.ltvCacRatio >= 3.0 ? 'kpi-value green mono' : result.ltvCacRatio >= 1.5 ? 'kpi-value mono' : 'kpi-value crimson mono';
+      if (kpiLTVCAC) {
+        kpiLTVCAC.textContent = `${result.ltvCacRatio}x`;
+        kpiLTVCAC.className = result.ltvCacRatio >= 3.0 ? 'kpi-value green mono' : result.ltvCacRatio >= 1.5 ? 'kpi-value mono' : 'kpi-value crimson mono';
+      }
   
-      kpiPayback.textContent = `${result.paybackMonths} mos`;
-      kpiPayback.className = result.paybackMonths <= 12 ? 'kpi-value green mono' : result.paybackMonths <= 18 ? 'kpi-value mono' : 'kpi-value crimson mono';
+      if (kpiPayback) {
+        kpiPayback.textContent = `${result.paybackMonths} mos`;
+        kpiPayback.className = result.paybackMonths <= 12 ? 'kpi-value green mono' : result.paybackMonths <= 18 ? 'kpi-value mono' : 'kpi-value crimson mono';
+      }
   
-      kpiLTV.textContent = formatCurrency(result.ltv);
-      kpiLifeSub.textContent = `Avg ${result.customerLifetimeMonths} months lifespan`;
+      if (kpiLTV) kpiLTV.textContent = formatCurrency(result.ltv);
+      if (kpiLifeSub) kpiLifeSub.textContent = `Avg ${result.customerLifetimeMonths} months lifespan`;
   
-      kpiMagic.textContent = result.magicNumber !== null ? `${result.magicNumber}` : 'N/A';
-      kpiMagic.className = result.magicNumber >= 1.0 ? 'kpi-value green mono' : 'kpi-value mono';
+      if (kpiMagic) {
+        kpiMagic.textContent = result.magicNumber !== null ? `${result.magicNumber}` : 'N/A';
+        kpiMagic.className = result.magicNumber >= 1.0 ? 'kpi-value green mono' : 'kpi-value mono';
+      }
   
-      kpiRule40.textContent = `${result.ruleOf40Score}%`;
-      kpiRule40.className = result.meetsRuleOf40 ? 'kpi-value green mono' : 'kpi-value mono';
-      kpiRuleSub.textContent = result.meetsRuleOf40 ? 'Elite Venture Benchmark Met (>=40%)' : 'Below Rule of 40 Benchmark (<40%)';
+      if (kpiRule40) {
+        kpiRule40.textContent = `${result.ruleOf40Score}%`;
+        kpiRule40.className = result.meetsRuleOf40 ? 'kpi-value green mono' : 'kpi-value mono';
+      }
+      if (kpiRuleSub) {
+        kpiRuleSub.textContent = result.meetsRuleOf40 ? 'Elite Venture Benchmark Met (>=40%)' : 'Below Rule of 40 Benchmark (<40%)';
+      }
   
       // Render Diagnosis Cards
       const diagList = document.getElementById('unit-diagnosis-list');
-      diagList.innerHTML = '';
-      result.diagnosis.forEach(d => {
-        const card = document.createElement('div');
-        const isOk = d.status === 'success';
-        const isWarn = d.status === 'warning' || d.status === 'info';
-        card.style.cssText = `padding: 12px 14px; border-radius: 6px; font-size: 13px; border: 1px solid ${isOk ? '#A7F3D0' : isWarn ? '#FDE68A' : '#FECACA'}; background: ${isOk ? '#ECFDF5' : isWarn ? '#FFFBEB' : '#FEF2F2'}; color: #0F172A;`;
-        card.innerHTML = `<strong>${d.metric}:</strong> ${d.text}`;
+      if (diagList) {
+        diagList.innerHTML = '';
+        result.diagnosis.forEach(d => {
+          const card = document.createElement('div');
+          const isOk = d.status === 'success';
+          const isWarn = d.status === 'warning' || d.status === 'info';
+          card.style.cssText = `padding: 12px 14px; border-radius: 6px; font-size: 13px; border: 1px solid ${isOk ? '#A7F3D0' : isWarn ? '#FDE68A' : '#FECACA'}; background: ${isOk ? '#ECFDF5' : isWarn ? '#FFFBEB' : '#FEF2F2'}; color: #0F172A;`;
+          card.innerHTML = `<strong>${d.metric}:</strong> ${d.text}`;
+          diagList.appendChild(card);
+        });
+      }
         diagList.appendChild(card);
       });
     }
@@ -2612,6 +2642,10 @@
     const sliderDiscount = document.getElementById('pricing-annual-discount');
     const sliderAdoption = document.getElementById('pricing-annual-adoption');
   
+    if (!inputCust || !inputStarter || !inputPro || !inputEnterprise || !sliderDiscount || !sliderAdoption) {
+      return;
+    }
+  
     const displayDiscount = document.getElementById('display-annual-discount');
     const displayAdoption = document.getElementById('display-annual-adoption');
   
@@ -2624,8 +2658,8 @@
       const discount = Number(sliderDiscount.value);
       const adoption = Number(sliderAdoption.value);
   
-      displayDiscount.textContent = `${discount}%`;
-      displayAdoption.textContent = `${adoption}%`;
+      if (displayDiscount) displayDiscount.textContent = `${discount}%`;
+      if (displayAdoption) displayAdoption.textContent = `${adoption}%`;
   
       const result = calculatePricingTiers({
         totalCustomers,
@@ -2636,25 +2670,32 @@
         annualAdoptionPct: adoption
       });
   
-      document.getElementById('pricing-blended-arpu').textContent = `${getCurrency()}${result.blendedEffectiveARPU}`;
-      document.getElementById('pricing-mrr').textContent = formatCurrency(result.mrr);
-      document.getElementById('pricing-arr').textContent = `${formatCurrency(result.arr)} ARR`;
-      document.getElementById('pricing-upfront-cash').textContent = formatCurrency(result.upfrontAnnualCash);
-      document.getElementById('pricing-churn-reduction').textContent = `-${result.estimatedChurnReductionPct}%`;
+      const setTxt = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+  
+      setTxt('pricing-blended-arpu', `${getCurrency()}${result.blendedEffectiveARPU}`);
+      setTxt('pricing-mrr', formatCurrency(result.mrr));
+      setTxt('pricing-arr', `${formatCurrency(result.arr)} ARR`);
+      setTxt('pricing-upfront-cash', formatCurrency(result.upfrontAnnualCash));
+      setTxt('pricing-churn-reduction', `-${result.estimatedChurnReductionPct}%`);
   
       // Tier Cards
       const breakdownContainer = document.getElementById('pricing-tiers-breakdown');
-      breakdownContainer.innerHTML = '';
-      result.tiers.forEach(t => {
-        const col = document.createElement('div');
-        col.style.cssText = 'padding: 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-card);';
-        col.innerHTML = `
-          <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary);">${t.name}</h4>
-          <div style="font-size: 20px; font-weight: 800; color: var(--emerald-primary); margin: 4px 0;" class="mono">${formatCurrency(t.price)}/mo</div>
-          <p style="font-size: 12px; color: var(--text-muted);">${t.customers} accounts (${t.sharePct}% volume)</p>
-        `;
-        breakdownContainer.appendChild(col);
-      });
+      if (breakdownContainer) {
+        breakdownContainer.innerHTML = '';
+        result.tiers.forEach(t => {
+          const col = document.createElement('div');
+          col.style.cssText = 'padding: 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-card);';
+          col.innerHTML = `
+            <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary);">${t.name}</h4>
+            <div style="font-size: 20px; font-weight: 800; color: var(--emerald-primary); margin: 4px 0;" class="mono">${formatCurrency(t.price)}/mo</div>
+            <p style="font-size: 12px; color: var(--text-muted);">${t.customers} accounts (${t.sharePct}% volume)</p>
+          `;
+          breakdownContainer.appendChild(col);
+        });
+      }
     }
   
     [inputCust, inputStarter, inputPro, inputEnterprise, sliderDiscount, sliderAdoption].forEach(el => {
@@ -2679,6 +2720,10 @@
   
     // 3. Hiring Impact
     const inputSalary = document.getElementById('calc-new-salary');
+  
+    if (!sliderMonths && !inputPreMoney && !inputSalary) {
+      return;
+    }
   
     function update() {
       const netBurn = Math.abs(currentRunwayResult?.initialNetBurn || 15000);
@@ -2853,6 +2898,8 @@
   // --- MODULE 4: STARTUP TYCOON SIMULATOR ---
   function setupTycoonSimulator() {
     const hudMonth = document.getElementById('tycoon-hud-month');
+    if (!hudMonth) return;
+  
     const hudCash = document.getElementById('tycoon-hud-cash');
     const hudMRR = document.getElementById('tycoon-hud-mrr');
     const hudBurn = document.getElementById('tycoon-hud-burn');
@@ -3088,11 +3135,12 @@
     const btnClose = document.getElementById('btn-close-legal');
   
     btnClose?.addEventListener('click', () => {
-      legalModal.classList.remove('open');
+      if (legalModal) legalModal.classList.remove('open');
     });
   
     document.getElementById('link-privacy')?.addEventListener('click', (e) => {
       e.preventDefault();
+      if (!legalModal || !legalTitle || !legalContent) return;
       legalTitle.textContent = 'Privacy Policy';
       legalContent.innerHTML = `
         <p><strong>1. Zero Data Collection:</strong> Budof (budof.com) does not store, transmit, or monetize your private financial numbers. All runway models, employee salaries, and unit economics calculations run 100% locally in your web browser.</p>
@@ -3106,6 +3154,7 @@
   
     document.getElementById('link-terms')?.addEventListener('click', (e) => {
       e.preventDefault();
+      if (!legalModal || !legalTitle || !legalContent) return;
       legalTitle.textContent = 'Terms of Use';
       legalContent.innerHTML = `
         <p><strong>1. Free License:</strong> Budof grants you an open, royalty-free license to model financial forecasts, export reports, and use simulation tools for commercial and educational purposes.</p>
@@ -3117,6 +3166,7 @@
   
     document.getElementById('link-disclaimer')?.addEventListener('click', (e) => {
       e.preventDefault();
+      if (!legalModal || !legalTitle || !legalContent) return;
       legalTitle.textContent = 'Financial & Legal Disclaimer';
       legalContent.innerHTML = `
         <p><strong>Important Notice:</strong> The calculations, unit economics indicators, and simulation models provided on Budof (budof.com) are for informational, strategic modeling, and educational purposes only.</p>
@@ -3131,12 +3181,12 @@
     const btnSubmitFeedback = document.getElementById('btn-submit-feedback');
   
     btnCloseFeedback?.addEventListener('click', () => {
-      feedbackModal.classList.remove('open');
+      if (feedbackModal) feedbackModal.classList.remove('open');
     });
   
     document.getElementById('link-feedback')?.addEventListener('click', (e) => {
       e.preventDefault();
-      feedbackModal.classList.add('open');
+      if (feedbackModal) feedbackModal.classList.add('open');
     });
   
     btnSubmitFeedback?.addEventListener('click', () => {

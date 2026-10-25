@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS CAC, LTV &amp; Payback Period Calculator | Budof</title>
+  <meta name="description" content="Calculate your SaaS Customer Acquisition Cost (CAC), Lifetime Value (LTV), LTV:CAC ratio, CAC Payback Period, Bessemer Magic Number, and Rule of 40 score with real-time algorithmic diagnosis.">
+  <meta name="keywords" content="saas unit economics calculator, cac payback period, ltv cac calculator, saas magic number, rule of 40 calculator, b2b saas metrics, customer lifetime value formula">
+  <link rel="canonical" href="https://budof.com/saas-unit-economics/">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://budof.com/saas-unit-economics/">
+  <meta property="og:title" content="SaaS CAC, LTV &amp; Payback Period Calculator | Budof">
+  <meta property="og:description" content="Instant CAC, LTV, Payback Months, Magic Number, and Rule of 40 scoring with algorithmic diagnosis cards for founders.">
+  <meta property="og:site_name" content="Budof">
+  <meta property="og:image" content="https://budof.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SaaS CAC, LTV &amp; Payback Period Calculator | Budof">
+  <meta name="twitter:description" content="Calculate your SaaS LTV:CAC, payback period, and Rule of 40 in seconds. 100% in-browser.">
+  <meta name="twitter:image" content="https://budof.com/og-image.png">
+
+  <!-- Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles.css">
+
+  <!-- Google AdSense Verification & Runtime Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0897820292119776" crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "SaaS CAC, LTV & Payback Period Calculator",
+    "url": "https://budof.com/saas-unit-economics/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Interactive SaaS unit economics calculator computing CAC, LTV, LTV:CAC ratio, Payback Period, Magic Number, and Rule of 40 scoring with algorithmic optimization advice."
+  }
+  </script>
+
+  <!-- JSON-LD Structured Data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is an ideal LTV:CAC ratio for B2B SaaS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An institutional target LTV:CAC ratio is 3.0x or higher. A ratio below 1.5x indicates that customer acquisition is unprofitable once overhead is accounted for. A ratio exceeding 5.0x often indicates under-investment in growth marketing, meaning the company could scale faster by increasing acquisition spend."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is CAC Payback Period calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CAC Payback Period = Customer Acquisition Cost (CAC) divided by (Average Monthly Revenue per User x Gross Margin %). For example, if CAC is $6,000, ARPU is $600/month, and gross margin is 80%, monthly gross profit is $480. Payback = $6,000 / $480 = 12.5 months."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the SaaS Magic Number?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The SaaS Magic Number measures sales efficiency by comparing Net New ARR added in a quarter against Sales & Marketing spend in that quarter. A Magic Number of 1.0 or greater indicates an exceptional go-to-market engine where every marketing dollar produces sustainable revenue."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the SaaS Rule of 40 work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Rule of 40 is a benchmark stating that a software company's annual revenue growth percentage plus its free cash flow margin percentage should equal or exceed 40%. A company growing 60% with -15% cash burn scores 45%, achieving elite status."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <a href="../" class="brand-wrapper" title="Budof Master Suite Hub">
+        <div class="brand-logo-mark">B</div>
+        <div class="brand-text">
+          <h1>BUDOF <span class="brand-pill">FINTECH SUITE</span></h1>
+          <p class="brand-tagline">Business Unit Dynamics &amp; Operational Finance</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button id="btn-export-csv" class="btn-secondary" title="Download Model as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button id="btn-print-report" class="btn-primary" title="Print Executive PDF Report">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Executive PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="header-nav-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <a href="../" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Suite Hub
+        </a>
+        <a href="../runway-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Runway Forecaster
+        </a>
+        <a href="../saas-unit-economics/" class="nav-tab-btn active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          SaaS Unit Economics
+        </a>
+        <a href="../fundraising-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Founder Calculators
+        </a>
+        <a href="../saas-valuation/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          SaaS Benchmarks &amp; Valuation
+        </a>
+        <a href="../deals-perks/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+          Founder Perks &amp; Deals
+        </a>
+        <a href="../startup-tycoon/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
+          Startup Tycoon Simulator
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Top Ad Slot -->
+  <div class="main-content" style="padding-bottom: 0;">
+    <div class="ad-slot-leaderboard" id="ad-top-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-0897820292119776"
+           data-ad-slot="9812739102"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- Interactive Unit Economics Section -->
+    <section id="tab-unit-economics" class="tab-panel active">
+      
+      <div class="workbench-grid">
+        
+        <!-- Controls Sidebar -->
+        <aside class="sidebar-controls">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Customer Acquisition Parameters</h3>
+              <span class="card-subtitle">Blended unit economics</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-cac" class="form-label">Blended CAC (Cost to Acquire)</label>
+                <span id="display-cac" class="form-val-display mono">$1,850</span>
+              </div>
+              <input type="range" id="input-cac" class="range-slider" min="50" max="25000" step="50" value="1850">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-arpu" class="form-label">ARPU (Monthly Rev / Customer)</label>
+                <span id="display-arpu" class="form-val-display mono">$240</span>
+              </div>
+              <input type="range" id="input-arpu" class="range-slider" min="10" max="5000" step="10" value="240">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-gross-margin" class="form-label">Gross Margin % (COGS subtracted)</label>
+                <span id="display-gross-margin" class="form-val-display mono">82%</span>
+              </div>
+              <input type="range" id="input-gross-margin" class="range-slider" min="20" max="98" step="1" value="82">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="input-churn-rate" class="form-label">Monthly Logo Churn %</label>
+                <span id="display-churn-rate" class="form-val-display mono">2.4%</span>
+              </div>
+              <input type="range" id="input-churn-rate" class="range-slider" min="0.1" max="15" step="0.1" value="2.4">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Efficiency Indicators (Quarterly)</h3>
+              <span class="card-subtitle">Magic Number &amp; Rule of 40</span>
+            </div>
+
+            <div class="form-group">
+              <label for="input-sm-spend" class="form-label">Quarterly Sales &amp; Mktg Spend ($)</label>
+              <input type="number" id="input-sm-spend" class="input-num" value="35000" step="1000">
+            </div>
+
+            <div class="form-group">
+              <label for="input-net-arr" class="form-label">Net New ARR Added ($)</label>
+              <input type="number" id="input-net-arr" class="input-num" value="48000" step="1000">
+            </div>
+
+            <div class="form-group">
+              <label for="input-annual-growth" class="form-label">Annual Revenue Growth %</label>
+              <input type="number" id="input-annual-growth" class="input-num" value="55" step="5">
+            </div>
+
+            <div class="form-group">
+              <label for="input-fcf-margin" class="form-label">Free Cash Flow Margin %</label>
+              <input type="number" id="input-fcf-margin" class="input-num" value="-10" step="1">
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main KPI & Diagnosis Stage -->
+        <section class="stage-view">
+          
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">LTV : CAC Ratio</div>
+              <div id="kpi-ltv-cac" class="kpi-value green mono">4.4x</div>
+              <div class="kpi-subtext">Target: &gt;= 3.0x for elite efficiency</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">CAC Payback Period</div>
+              <div id="kpi-payback-months" class="kpi-value green mono">9.4 mos</div>
+              <div class="kpi-subtext">Months of gross profit to repay CAC</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Customer Lifetime Value (LTV)</div>
+              <div id="kpi-ltv-val" class="kpi-value mono">$8,200</div>
+              <div id="kpi-lifetime-subtext" class="kpi-subtext">Avg 41.7 months lifespan</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-label">Rule of 40 Score</div>
+              <div id="kpi-rule-of-40" class="kpi-value green mono">45%</div>
+              <div id="kpi-rule-subtext" class="kpi-subtext">Growth % + FCF Margin %</div>
+            </div>
+          </div>
+
+          <!-- Secondary Indicators Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Bessemer Magic Number</h3>
+                <span class="card-subtitle">Quarterly GTM efficiency metric</span>
+              </div>
+              <div style="font-size: 28px; font-weight: 800; color: var(--emerald-primary);" id="kpi-magic-number" class="mono">1.37</div>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">&gt; 1.0 means high capital efficiency; scale acquisition spend aggressively.</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Target Payback Health</h3>
+                <span class="card-subtitle">Working capital strain benchmark</span>
+              </div>
+              <div style="font-size: 28px; font-weight: 800; color: var(--text-primary);" class="mono">&lt; 12 Months</div>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Enables companies to self-fund expansion without dilutive capital.</p>
+            </div>
+          </div>
+
+          <!-- Algorithmic Diagnosis Panel -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Algorithmic Diagnostic Evaluation</h3>
+              <span class="card-subtitle">Automated venture-scale heuristic analysis</span>
+            </div>
+            <div id="unit-diagnosis-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Populated dynamically via app.js -->
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- Deep SEO Content & Expert Breakdown -->
+    <section class="seo-content-section">
+      <article class="seo-guide-container">
+        
+        <header class="seo-article-header">
+          <h2 class="seo-article-title">Mastering SaaS Unit Economics: From CAC Payback to The Rule of 40</h2>
+          <p class="seo-article-lead">In technology software businesses, unit economics represent the fundamental atomic physics of profitability. A startup with flawed unit economics burns cash faster as it scales. Below is the comprehensive playbook for measuring, optimizing, and presenting your unit metrics to venture investors.</p>
+        </header>
+
+        <h3 class="seo-h2">1. The Mathematics of Customer Lifetime Value (LTV)</h3>
+        <p class="seo-p">Lifetime Value represents the total net gross profit an individual customer account will generate over its entire active duration before churning. Calculating LTV requires incorporating gross margins:</p>
+
+        <div class="formula-box">
+          <div class="formula-label">Accurate SaaS LTV Formula</div>
+          LTV = (ARPU × Gross Margin %) ÷ Monthly Churn Rate
+          <br><br>
+          <div class="formula-label">Example Calculation</div>
+          If ARPU = $240/mo, Gross Margin = 82%, and Monthly Churn = 2.4%:
+          <br>
+          LTV = ($240 × 0.82) ÷ 0.024 = $196.80 ÷ 0.024 = <strong>$8,200</strong>
+        </div>
+
+        <h3 class="seo-h2">2. The LTV:CAC Ratio Benchmarks</h3>
+        <p class="seo-p">The relationship between customer acquisition expenditure and long-term customer worth governs capital efficiency:</p>
+        
+        <table class="benchmark-data-table">
+          <thead>
+            <tr>
+              <th>LTV:CAC Ratio</th>
+              <th>Health Classification</th>
+              <th>Strategic Action Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>&lt; 1.5x</strong></td>
+              <td><span style="color:#DC2626; font-weight:700;">Critical Danger</span></td>
+              <td>Acquisition costs exceed customer gross profit. Halt paid marketing immediately and optimize funnel conversions.</td>
+            </tr>
+            <tr>
+              <td><strong>1.5x – 2.9x</strong></td>
+              <td><span style="color:#D97706; font-weight:600;">Mediocre</span></td>
+              <td>Viable for bootstrapped businesses, but insufficient for venture returns due to overhead and financing costs.</td>
+            </tr>
+            <tr>
+              <td><strong>3.0x – 5.0x</strong></td>
+              <td><span style="color:#059669; font-weight:700;">Elite Venture Grade</span></td>
+              <td>Ideal balance of capital efficiency and aggressive growth. The gold standard for Series A and B funding rounds.</td>
+            </tr>
+            <tr>
+              <td><strong>&gt; 5.0x</strong></td>
+              <td><span style="color:#2563EB; font-weight:600;">Under-Invested</span></td>
+              <td>Acquisition is so cheap that the startup is likely growing slower than its total addressable market allows. Increase spend.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="seo-h2">3. CAC Payback Period: The Cash Flow Engine</h3>
+        <p class="seo-p">While LTV is theoretical, CAC Payback is practical cash reality. It dictates how many months of customer revenue are required to repay the cost of acquiring that customer. Elite B2B SaaS businesses recover CAC in under 12 months, allowing reinvestment into new acquisition cohorts every year.</p>
+
+        <h3 class="seo-h2">4. The Rule of 40 Explained</h3>
+        <p class="seo-p">Formulated by venture capitalists to evaluate both high-growth cash-burning startups and mature profitable software firms on an equal footing, the Rule of 40 combines growth with cash efficiency:</p>
+
+        <div class="formula-box">
+          <div class="formula-label">Rule of 40 Formula</div>
+          Score = Year-over-Year Revenue Growth Rate (%) + Free Cash Flow Margin (%)
+        </div>
+
+        <p class="seo-p">A company expanding at 70% with a -25% FCF margin scores 45% (passes). Conversely, an enterprise firm growing at 15% with a 30% cash margin scores 45% (passes). Public market valuations closely correlate with Rule of 40 performance.</p>
+
+        <h3 class="seo-h2">Frequently Asked Questions</h3>
+        <div class="faq-item open">
+          <button class="faq-question">
+            <span>What is the difference between Logo Churn and Net Dollar Retention?</span>
+            <span style="font-size:16px; font-weight:700;">−</span>
+          </button>
+          <div class="faq-answer">Logo Churn measures the percentage of customer accounts that cancel service in a given period. Net Dollar Retention (NDR) measures the percentage of recurring revenue retained from an existing customer cohort, including expansion, cross-sells, and upgrades. A company can have 3% monthly logo churn while maintaining 125% annual NDR if expanding accounts outweigh churning ones.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Why is Gross Margin crucial when calculating LTV?</span>
+            <span style="font-size:16px; font-weight:700;">+</span>
+          </button>
+          <div class="faq-answer">Many founders mistakenly compute LTV as Revenue divided by Churn, ignoring COGS (hosting, payment processing, third-party APIs, and customer support). If your revenue is $100/mo but serving that customer costs $40/mo in infrastructure, your gross profit is only $60/mo. Failing to multiply by Gross Margin overstates your actual economic lifetime value by 20% to 50%.</div>
+        </div>
+
+      </article>
+    </section>
+
+  </main>
+
+  <!-- Legal Modal -->
+  <div id="legal-modal-overlay" class="modal-overlay">
+    <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
+      <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
+      <div id="legal-modal-content" class="modal-body"></div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
+      </div>
+      <div class="footer-links">
+        <a href="../" class="footer-tab-link">Suite Hub</a>
+        <a href="../runway-calculator/" class="footer-tab-link">Runway Calculator</a>
+        <a href="../saas-unit-economics/" class="footer-tab-link" style="color:var(--emerald-primary); font-weight:700;">SaaS CAC/LTV</a>
+        <a href="../fundraising-calculator/" class="footer-tab-link">Founder Calculators</a>
+        <a href="../saas-valuation/" class="footer-tab-link">SaaS Benchmarks</a>
+        <a href="../deals-perks/" class="footer-tab-link">Founder Perks</a>
+        <a href="../startup-tycoon/" class="footer-tab-link">Startup Game</a>
+        <a href="#" id="link-privacy">Privacy Policy</a>
+        <a href="#" id="link-terms">Terms of Use</a>
+        <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../bundle.js"></script>
+</body>
+</html>

@@ -396,6 +396,146 @@ test('Static Assets: SEO & Cloudflare deployment files', () => {
   assert.ok(fs.existsSync('./sitemap.xml'), 'sitemap.xml must exist');
   assert.ok(fs.existsSync('./_headers'), '_headers must exist');
   assert.ok(fs.existsSync('./favicon.svg'), 'favicon.svg must exist');
+  assert.ok(fs.existsSync('./og-image.png'), 'og-image.png must exist');
+  assert.ok(fs.existsSync('./og-banner.svg'), 'og-banner.svg must exist');
+  assert.ok(fs.statSync('./og-image.png').size > 10000, 'og-image.png must be non-empty image');
+  assert.ok(fs.statSync('./og-banner.svg').size > 1000, 'og-banner.svg must be non-empty SVG');
+});
+
+// 11. Multi-Page Static SEO Architecture Tests
+test('Multi-Page Architecture: All 6 dedicated tool subdirectories and index.html exist', () => {
+  const tools = [
+    'runway-calculator',
+    'saas-unit-economics',
+    'fundraising-calculator',
+    'saas-valuation',
+    'startup-tycoon',
+    'deals-perks'
+  ];
+
+  for (const tool of tools) {
+    const dirPath = `./${tool}`;
+    const filePath = `./${tool}/index.html`;
+    assert.ok(fs.existsSync(dirPath), `Directory ${dirPath} must exist`);
+    assert.ok(fs.existsSync(filePath), `File ${filePath} must exist`);
+  }
+});
+
+test('Multi-Page SEO: Dedicated titles, canonical URLs, relative assets & schema validation', () => {
+  const pageSpecs = [
+    {
+      path: './runway-calculator/index.html',
+      title: 'Startup Runway Calculator & 36-Month Burn Forecaster | Budof',
+      canonical: 'https://budof.com/runway-calculator/',
+      schemaCheck: 'WebApplication'
+    },
+    {
+      path: './saas-unit-economics/index.html',
+      title: 'SaaS CAC, LTV & Payback Period Calculator | Budof',
+      canonical: 'https://budof.com/saas-unit-economics/',
+      schemaCheck: 'WebApplication'
+    },
+    {
+      path: './fundraising-calculator/index.html',
+      title: 'Startup Fundraising Target & Runway Extension Calculator | Budof',
+      canonical: 'https://budof.com/fundraising-calculator/',
+      schemaCheck: 'WebApplication'
+    },
+    {
+      path: './saas-valuation/index.html',
+      title: 'SaaS ARR Valuation Multiple Estimator & Industry Benchmarks | Budof',
+      canonical: 'https://budof.com/saas-valuation/',
+      schemaCheck: 'WebApplication'
+    },
+    {
+      path: './startup-tycoon/index.html',
+      title: 'Startup Tycoon Game Online — 24-Month Business Simulator | Budof',
+      canonical: 'https://budof.com/startup-tycoon/',
+      schemaCheck: 'VideoGame'
+    },
+    {
+      path: './deals-perks/index.html',
+      title: 'Startup Deals, Cloud Credits & Founder Banking Perks | Budof',
+      canonical: 'https://budof.com/deals-perks/',
+      schemaCheck: 'WebApplication'
+    }
+  ];
+
+  for (const spec of pageSpecs) {
+    const html = fs.readFileSync(spec.path, 'utf-8');
+    assert.ok(
+      html.includes(`<title>${spec.title}</title>`) || html.includes(`<title>${spec.title.replace(/&/g, '&amp;')}</title>`),
+      `${spec.path} must have exact dedicated title: ${spec.title}`
+    );
+    assert.ok(html.includes(`<link rel="canonical" href="${spec.canonical}">`), `${spec.path} must have canonical URL ${spec.canonical}`);
+    assert.ok(html.includes('href="../styles.css"'), `${spec.path} must link to relative ../styles.css for file:/// and Cloudflare support`);
+    assert.ok(html.includes('src="../bundle.js"'), `${spec.path} must link to relative ../bundle.js for file:/// and Cloudflare support`);
+    assert.ok(html.includes(spec.schemaCheck), `${spec.path} must include ${spec.schemaCheck} schema`);
+    assert.ok(html.includes('https://budof.com/og-image.png'), `${spec.path} must include OpenGraph social preview image`);
+  }
+});
+
+test('Multi-Page Hub: Master index.html links cleanly to all 6 specialized tools', () => {
+  const html = fs.readFileSync('./index.html', 'utf-8');
+  assert.ok(html.includes('href="runway-calculator/"'), 'Hub must link to runway-calculator/');
+  assert.ok(html.includes('href="saas-unit-economics/"'), 'Hub must link to saas-unit-economics/');
+  assert.ok(html.includes('href="fundraising-calculator/"'), 'Hub must link to fundraising-calculator/');
+  assert.ok(html.includes('href="saas-valuation/"'), 'Hub must link to saas-valuation/');
+  assert.ok(html.includes('href="startup-tycoon/"'), 'Hub must link to startup-tycoon/');
+  assert.ok(html.includes('href="deals-perks/"'), 'Hub must link to deals-perks/');
+  assert.ok(html.includes('https://budof.com/og-image.png'), 'Hub must reference og-image.png');
+});
+
+test('Sitemap Integrity: sitemap.xml contains all 7 canonical URLs with proper priority scores', () => {
+  const sitemap = fs.readFileSync('./sitemap.xml', 'utf-8');
+  const expectedUrls = [
+    { url: 'https://budof.com/', priority: '1.0' },
+    { url: 'https://budof.com/runway-calculator/', priority: '0.9' },
+    { url: 'https://budof.com/saas-unit-economics/', priority: '0.9' },
+    { url: 'https://budof.com/fundraising-calculator/', priority: '0.9' },
+    { url: 'https://budof.com/saas-valuation/', priority: '0.9' },
+    { url: 'https://budof.com/startup-tycoon/', priority: '0.9' },
+    { url: 'https://budof.com/deals-perks/', priority: '0.9' }
+  ];
+
+  for (const item of expectedUrls) {
+    assert.ok(sitemap.includes(`<loc>${item.url}</loc>`), `sitemap.xml must contain ${item.url}`);
+    assert.ok(sitemap.includes(`<priority>${item.priority}</priority>`), `sitemap.xml must have priority ${item.priority} for ${item.url}`);
+  }
+});
+
+test('Cloudflare Workers & Static Assets: wrangler.jsonc configuration integrity', () => {
+  assert.ok(fs.existsSync('./wrangler.jsonc'), 'wrangler.jsonc must exist in repository root');
+  const content = fs.readFileSync('./wrangler.jsonc', 'utf-8');
+  const config = JSON.parse(content);
+  assert.strictEqual(config.name, 'budof', 'Worker name must be budof');
+  assert.strictEqual(config.main, 'worker.js', 'Worker entry point must be worker.js');
+  assert.ok(config.assets, 'assets configuration must be defined');
+  assert.strictEqual(config.assets.directory, '.', 'assets directory must be root (.)');
+  assert.strictEqual(config.assets.binding, 'ASSETS', 'assets binding must be ASSETS');
+  assert.strictEqual(config.assets.run_worker_first, false, 'run_worker_first must be FALSE for unlimited free edge static delivery');
+});
+
+test('Cloudflare Workers Entry Point: worker.js syntax and exports', async () => {
+  assert.ok(fs.existsSync('./worker.js'), 'worker.js must exist in repository root');
+  const workerModule = await import('./worker.js');
+  assert.ok(workerModule.default, 'worker.js must export default object');
+  assert.strictEqual(typeof workerModule.default.fetch, 'function', 'worker.js must export fetch function');
+
+  // Test ads.txt handler
+  const mockAdsRequest = new Request('https://budof.com/ads.txt');
+  const adsResponse = await workerModule.default.fetch(mockAdsRequest, {}, {});
+  assert.strictEqual(adsResponse.status, 200);
+  const adsText = await adsResponse.text();
+  assert.ok(adsText.includes('pub-0897820292119776'), 'ads.txt must deliver publisher ID directly');
+
+  // Test API health route
+  const mockApiRequest = new Request('https://budof.com/api/health');
+  const apiResponse = await workerModule.default.fetch(mockApiRequest, {}, {});
+  assert.strictEqual(apiResponse.status, 200);
+  const apiJson = await apiResponse.json();
+  assert.strictEqual(apiJson.status, 'healthy');
+  assert.strictEqual(apiJson.service, 'budof-engine');
 });
 
 console.log(`\nAll ${passedTests} automated tests PASSED successfully!\n`);

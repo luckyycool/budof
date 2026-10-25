@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Tycoon Game Online — 24-Month Business Simulator | Budof</title>
+  <meta name="description" content="Play the free 24-month startup tycoon business simulation game in your browser. Hire engineers, manage cash burn, survive random crises, and pitch VCs for Angel, Seed, and Series A funding.">
+  <meta name="keywords" content="startup tycoon game online, business simulation game, startup simulator browser, founder tycoon, venture capital pitch simulator, turn based business game">
+  <link rel="canonical" href="https://budof.com/startup-tycoon/">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:type" content="game">
+  <meta property="og:url" content="https://budof.com/startup-tycoon/">
+  <meta property="og:title" content="Startup Tycoon Game Online — 24-Month Business Simulator | Budof">
+  <meta property="og:description" content="Test your founder survival skills in a 24-month turn-based startup simulator. Manage headcount, cash burn, and pitch VCs for Series A. 100% free in-browser.">
+  <meta property="og:site_name" content="Budof">
+  <meta property="og:image" content="https://budof.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Startup Tycoon Game Online — 24-Month Business Simulator | Budof">
+  <meta name="twitter:description" content="Can your startup survive 24 months and raise a Series A? Play free in your browser.">
+  <meta name="twitter:image" content="https://budof.com/og-image.png">
+
+  <!-- Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles.css">
+
+  <!-- Google AdSense Verification & Runtime Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0897820292119776" crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data: VideoGame -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Startup Tycoon — 24-Month Business Simulator",
+    "url": "https://budof.com/startup-tycoon/",
+    "description": "Turn-based business simulation game where founders manage headcount, balance cash burn, allocate marketing budgets, survive unpredictable startup crises, and pitch VCs for Angel, Seed, and Series A funding over 24 months.",
+    "genre": ["Simulation", "Strategy", "Business"],
+    "gamePlatform": ["Web Browser"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "playMode": "SinglePlayer",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD Structured Data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do you win Startup Tycoon?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To win Startup Tycoon, your startup must survive all 24 months without running out of cash, maintain a healthy product quality score (>70), grow monthly recurring revenue (MRR) above $25,000, and successfully close a priced Series A funding round from institutional venture capital investors."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What causes bankruptcy in the game?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Bankruptcy occurs when your monthly Net Burn exceeds your remaining liquid cash balance at the end of a turn. Overhiring high-salary engineers too early without matching customer acquisition revenue is the most frequent cause of startup failure."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the requirements to pitch Angel and Seed investors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To unlock an Angel round ($150,000 for 8% equity), you need at least $3,000 MRR and product quality >= 50. To raise a Seed round ($500,000 for 15% equity), you need at least $10,000 MRR and product quality >= 65."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <a href="../" class="brand-wrapper" title="Budof Master Suite Hub">
+        <div class="brand-logo-mark">B</div>
+        <div class="brand-text">
+          <h1>BUDOF <span class="brand-pill">FINTECH SUITE</span></h1>
+          <p class="brand-tagline">Business Unit Dynamics &amp; Operational Finance</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button id="btn-export-csv" class="btn-secondary" title="Download Model as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button id="btn-print-report" class="btn-primary" title="Print Executive PDF Report">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Executive PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="header-nav-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <a href="../" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Suite Hub
+        </a>
+        <a href="../runway-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Runway Forecaster
+        </a>
+        <a href="../saas-unit-economics/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          SaaS Unit Economics
+        </a>
+        <a href="../fundraising-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Founder Calculators
+        </a>
+        <a href="../saas-valuation/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          SaaS Benchmarks &amp; Valuation
+        </a>
+        <a href="../deals-perks/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+          Founder Perks &amp; Deals
+        </a>
+        <a href="../startup-tycoon/" class="nav-tab-btn active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
+          Startup Tycoon Simulator
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Top Ad Slot -->
+  <div class="main-content" style="padding-bottom: 0;">
+    <div class="ad-slot-leaderboard" id="ad-top-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-0897820292119776"
+           data-ad-slot="9812739102"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- Interactive Startup Tycoon Section -->
+    <section id="tab-tycoon" class="tab-panel active">
+      
+      <!-- Tycoon HUD Bar -->
+      <div class="tycoon-hud-wrapper">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-primary);">24-Month Venture Survival Simulator</h2>
+            <p style="font-size: 12px; color: var(--text-muted);">Manage headcount, balance burn, survive random crises, and pitch VCs before cash hits zero.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-tycoon-audio" class="btn-secondary" style="font-size: 11px;">🔊 Sound: On</button>
+            <button id="btn-reset-game" class="btn-secondary" style="font-size: 11px; color: #DC2626;">Reset Journey</button>
+          </div>
+        </div>
+
+        <div class="tycoon-hud-grid">
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Timeline</span>
+            <span id="tycoon-hud-month" class="hud-tile-val mono">Month 1 / 24</span>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Cash Balance</span>
+            <span id="tycoon-hud-cash" class="hud-tile-val mono green">$120,000</span>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Monthly MRR</span>
+            <span id="tycoon-hud-mrr" class="hud-tile-val mono green">$3,500</span>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Net Burn</span>
+            <span id="tycoon-hud-burn" class="hud-tile-val mono crimson">-$7,500</span>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Active Customers</span>
+            <span id="tycoon-hud-customers" class="hud-tile-val mono">60</span>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-tile-lbl">Product Quality</span>
+            <span id="tycoon-hud-quality" class="hud-tile-val mono">60 / 100</span>
+          </div>
+        </div>
+
+        <div style="background: var(--border-color); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 14px;">
+          <div id="tycoon-progress-bar" style="background: var(--emerald-primary); height: 100%; width: 4%; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Main Tycoon Controls & Log Grid -->
+      <div class="workbench-grid" style="margin-top: 20px;">
+        
+        <!-- Controls Column -->
+        <aside class="sidebar-controls">
+          
+          <!-- Headcount Management -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Headcount Roster</h3>
+              <span class="card-subtitle">Monthly salaries with +15% taxes</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                <div><strong>Co-Founders:</strong> <span style="color:var(--text-muted);">$3,000/mo</span></div>
+                <span id="team-count-founders" class="mono" style="font-weight:700;">2</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                <div><strong>Engineers:</strong> <span style="color:var(--text-muted);">$7,000/mo</span></div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button id="btn-fire-engineer" class="btn-secondary" style="padding:2px 8px;">−</button>
+                  <span id="team-count-engineers" class="mono" style="font-weight:700; width:16px; text-align:center;">1</span>
+                  <button id="btn-hire-engineer" class="btn-primary" style="padding:2px 8px;">+</button>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                <div><strong>Growth Marketers:</strong> <span style="color:var(--text-muted);">$5,000/mo</span></div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button id="btn-fire-marketer" class="btn-secondary" style="padding:2px 8px;">−</button>
+                  <span id="team-count-marketers" class="mono" style="font-weight:700; width:16px; text-align:center;">0</span>
+                  <button id="btn-hire-marketer" class="btn-primary" style="padding:2px 8px;">+</button>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                <div><strong>Account Execs:</strong> <span style="color:var(--text-muted);">$6,000/mo</span></div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button id="btn-fire-sales" class="btn-secondary" style="padding:2px 8px;">−</button>
+                  <span id="team-count-sales" class="mono" style="font-weight:700; width:16px; text-align:center;">0</span>
+                  <button id="btn-hire-sales" class="btn-primary" style="padding:2px 8px;">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly Discretionary Budgets -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Discretionary Budgets</h3>
+              <span class="card-subtitle">Paid acquisition &amp; cloud R&amp;D</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="tycoon-budget-marketing" class="form-label">Paid Growth Ads ($/mo)</label>
+                <span id="display-tycoon-marketing" class="form-val-display mono">$1,500</span>
+              </div>
+              <input type="range" id="tycoon-budget-marketing" class="range-slider" min="0" max="25000" step="500" value="1500">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="tycoon-budget-rd" class="form-label">R&amp;D Cloud Infrastructure ($/mo)</label>
+                <span id="display-tycoon-rd" class="form-val-display mono">$800</span>
+              </div>
+              <input type="range" id="tycoon-budget-rd" class="range-slider" min="0" max="15000" step="200" value="800">
+            </div>
+          </div>
+
+          <!-- Turn Advancement -->
+          <button id="btn-advance-month" class="btn-primary" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 800;">
+            Advance to Next Month ➔
+          </button>
+        </aside>
+
+        <!-- Main Tycoon Stage: Pitching & Log Feed -->
+        <section class="stage-view">
+          
+          <!-- Venture Investor Pitch Panel -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Venture Capital Pitch Deck</h3>
+              <span class="card-subtitle">Pitch institutional rounds when metrics meet criteria</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;">
+              <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Angel Round</h4>
+                <div style="font-size: 18px; font-weight: 800; color: var(--emerald-primary); margin: 2px 0;" class="mono">+$150k</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Requires $3k MRR • 8% Dilution</div>
+                <button id="btn-pitch-angel" class="btn-secondary" style="width: 100%; font-size: 11px; padding: 6px;">Pitch Angels</button>
+              </div>
+
+              <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Seed Round</h4>
+                <div style="font-size: 18px; font-weight: 800; color: var(--emerald-primary); margin: 2px 0;" class="mono">+$500k</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Requires $10k MRR • 15% Dilution</div>
+                <button id="btn-pitch-seed" class="btn-secondary" style="width: 100%; font-size: 11px; padding: 6px;">Pitch Seed Fund</button>
+              </div>
+
+              <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Series A</h4>
+                <div style="font-size: 18px; font-weight: 800; color: var(--emerald-primary); margin: 2px 0;" class="mono">+$2.0M</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Requires $25k MRR • 20% Dilution</div>
+                <button id="btn-pitch-seriesa" class="btn-primary" style="width: 100%; font-size: 11px; padding: 6px;">Pitch Tier-1 VC</button>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 12px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+              <span>Founder Ownership: <strong id="cap-founder-equity" class="mono" style="color:var(--emerald-primary);">100%</strong></span>
+              <span>Investor Ownership: <strong id="cap-investor-equity" class="mono" style="color:var(--text-muted);">0%</strong></span>
+            </div>
+          </div>
+
+          <!-- Real-Time Activity Log Feed -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h3 class="card-title">Executive Action Log &amp; Financial Feed</h3>
+              <span class="card-subtitle">Real-time chronicle of startup decisions</span>
+            </div>
+            <div id="tycoon-log-feed" class="log-feed" style="max-height: 260px; overflow-y: auto;">
+              <div class="log-item">🚀 Company incorporated! Starting cash: $120,000 with 2 founders and 1 engineer.</div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </section>
+
+    <!-- Deep SEO Content & Strategy Guide -->
+    <section class="seo-content-section">
+      <article class="seo-guide-container">
+        
+        <header class="seo-article-header">
+          <h2 class="seo-article-title">Startup Tycoon: The 24-Month Venture Survival Strategy Guide</h2>
+          <p class="seo-article-lead">More than 90% of early-stage startups fail before reaching Series A. Startup Tycoon models the authentic mathematical tradeoffs founders face: hiring engineering speed vs runway depletion, customer acquisition spend vs gross margins, and VC dilution vs sovereign bootstrapping.</p>
+        </header>
+
+        <h3 class="seo-h2">1. Surviving the Valley of Death (Months 1–12)</h3>
+        <p class="seo-p">During the initial 12 months, your primary objective is <strong>Product-Market Fit (PMF)</strong> rather than aggressive sales headcount. Key strategies to survive:</p>
+        <ul style="margin-left: 24px; margin-bottom: 16px; font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
+          <li><strong>Keep Core Headcount Lean:</strong> Avoid hiring sales representatives before your product quality exceeds 65. Selling an unpolished product leads to sky-high customer churn.</li>
+          <li><strong>Allocate R&amp;D Budget:</strong> Investing in infrastructure and code quality boosts customer retention and prevents server outage crises.</li>
+          <li><strong>Close an Angel Round:</strong> Pitching angels as soon as you surpass $3,000 MRR injects $150,000 of non-dilutive lifeblood into your runway.</li>
+        </ul>
+
+        <h3 class="seo-h2">2. Scaling Growth to Series A (Months 13–24)</h3>
+        <p class="seo-p">Once product quality is high, shift discretionary budget into paid marketing and hire Account Executives to close enterprise contracts. Achieving $25,000+ MRR qualifies your startup for an institutional $2,000,000 Series A term sheet.</p>
+
+        <h3 class="seo-h2">Frequently Asked Questions</h3>
+        <div class="faq-item open">
+          <button class="faq-question">
+            <span>Is the game simulation deterministic or random?</span>
+            <span style="font-size:16px; font-weight:700;">−</span>
+          </button>
+          <div class="faq-answer">Startup Tycoon utilizes a hybrid simulation engine. Financial calculations (payroll, tax buffers, gross profit, cash balance) are 100% deterministic and mathematically verified. However, startup crises, viral spikes, and poach threats are triggered probabilistically, mimicking real-world startup market volatility.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I save my simulation progress?</span>
+            <span style="font-size:16px; font-weight:700;">+</span>
+          </button>
+          <div class="faq-answer">Yes, simulation state and high scores are automatically preserved in your web browser's local storage, allowing you to resume your 24-month journey across browser sessions.</div>
+        </div>
+
+      </article>
+    </section>
+
+  </main>
+
+  <!-- Event Modal Overlay -->
+  <div id="event-modal-overlay" class="modal-overlay">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span id="event-modal-badge" class="badge" style="background:#FFFBEB; color:#D97706; border:1px solid #FDE68A;">⚠️ Strategic Decision</span>
+      </div>
+      <h3 id="event-modal-title" class="modal-title">Startup Event Title</h3>
+      <p id="event-modal-body" class="modal-body" style="margin-bottom: 20px;">Event description...</p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button id="btn-choice-0" class="btn-primary" style="text-align: left; padding: 12px;">
+          <strong id="choice-title-0" style="display:block;">Choice 1 Title</strong>
+          <span id="choice-desc-0" style="font-size: 11px; opacity: 0.85;">Impact description</span>
+        </button>
+
+        <button id="btn-choice-1" class="btn-secondary" style="text-align: left; padding: 12px;">
+          <strong id="choice-title-1" style="display:block;">Choice 2 Title</strong>
+          <span id="choice-desc-1" style="font-size: 11px; opacity: 0.85;">Impact description</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legal Modal -->
+  <div id="legal-modal-overlay" class="modal-overlay">
+    <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
+      <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
+      <div id="legal-modal-content" class="modal-body"></div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
+      </div>
+      <div class="footer-links">
+        <a href="../" class="footer-tab-link">Suite Hub</a>
+        <a href="../runway-calculator/" class="footer-tab-link">Runway Calculator</a>
+        <a href="../saas-unit-economics/" class="footer-tab-link">SaaS CAC/LTV</a>
+        <a href="../fundraising-calculator/" class="footer-tab-link">Founder Calculators</a>
+        <a href="../saas-valuation/" class="footer-tab-link">SaaS Benchmarks</a>
+        <a href="../deals-perks/" class="footer-tab-link">Founder Perks</a>
+        <a href="../startup-tycoon/" class="footer-tab-link" style="color:var(--emerald-primary); font-weight:700;">Startup Game</a>
+        <a href="#" id="link-privacy">Privacy Policy</a>
+        <a href="#" id="link-terms">Terms of Use</a>
+        <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../bundle.js"></script>
+</body>
+</html>

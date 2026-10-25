@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>
+      .bg { fill: #FBFBF9; }
+      .bar { fill: #059669; }
+      .brand-box { fill: #059669; rx: 12px; }
+      .card-bg { fill: #FFFFFF; stroke: #E2E8F0; stroke-width: 2; rx: 8px; }
+      .text-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 38px; font-weight: 800; fill: #0F172A; }
+      .text-sub { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 18px; fill: #475569; }
+      .brand-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 26px; font-weight: 800; fill: #0F172A; }
+      .brand-tag { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #059669; letter-spacing: 0.1em; }
+      .card-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; fill: #0F172A; }
+      .card-metric { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 800; fill: #059669; }
+      .card-desc { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #64748B; }
+      .footer-txt { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; fill: #64748B; }
+      .white-b { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 42px; font-weight: 800; fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="630" class="bg" />
+  <!-- Emerald Accent Line -->
+  <rect width="1200" height="8" class="bar" />
+
+  <!-- Logo Mark -->
+  <rect x="80" y="70" width="70" height="70" rx="12" class="brand-box" />
+  <text x="100" y="122" class="white-b">B</text>
+
+  <!-- Brand Headers -->
+  <text x="170" y="98" class="brand-title">BUDOF FINTECH SUITE</text>
+  <text x="170" y="124" class="brand-tag">BUSINESS UNIT DYNAMICS &amp; OPERATIONAL FINANCE</text>
+
+  <!-- Main Headline -->
+  <text x="80" y="210" class="text-title">Startup Runway, SaaS Unit Economics &amp; Tycoon Simulator</text>
+  <text x="80" y="255" class="text-sub">Model 36-month burn, Default Alive status, LTV:CAC, cap table dilution, and play the 24-month business game.</text>
+
+  <!-- Feature Cards Grid (4 Columns) -->
+  <!-- Card 1 -->
+  <g transform="translate(80, 310)">
+    <rect width="245" height="190" class="card-bg" rx="10" />
+    <text x="20" y="42" class="card-title">Runway Forecaster</text>
+    <text x="20" y="78" class="card-metric">36-Month Model</text>
+    <text x="20" y="115" class="card-desc">Dynamic burn simulation,</text>
+    <text x="20" y="135" class="card-desc">hiring roadmap, and</text>
+    <text x="20" y="155" class="card-desc">Default Alive indicators.</text>
+  </g>
+
+  <!-- Card 2 -->
+  <g transform="translate(350, 310)">
+    <rect width="245" height="190" class="card-bg" rx="10" />
+    <text x="20" y="42" class="card-title">SaaS Unit Economics</text>
+    <text x="20" y="78" class="card-metric">CAC : LTV &amp; R40</text>
+    <text x="20" y="115" class="card-desc">Payback period math,</text>
+    <text x="20" y="135" class="card-desc">Bessemer Magic Number,</text>
+    <text x="20" y="155" class="card-desc">and algorithmic diagnosis.</text>
+  </g>
+
+  <!-- Card 3 -->
+  <g transform="translate(620, 310)">
+    <rect width="245" height="190" class="card-bg" rx="10" />
+    <text x="20" y="42" class="card-title">Fundraising &amp; Dilution</text>
+    <text x="20" y="78" class="card-metric">Cap Tables &amp; SAFE</text>
+    <text x="20" y="115" class="card-desc">Round target sizing,</text>
+    <text x="20" y="135" class="card-desc">pre-money option pools,</text>
+    <text x="20" y="155" class="card-desc">and hiring runway impact.</text>
+  </g>
+
+  <!-- Card 4 -->
+  <g transform="translate(890, 310)">
+    <rect width="245" height="190" class="card-bg" rx="10" />
+    <text x="20" y="42" class="card-title">Startup Tycoon Game</text>
+    <text x="20" y="78" class="card-metric">24-Month Simulator</text>
+    <text x="20" y="115" class="card-desc">Turn-based founder game:</text>
+    <text x="20" y="135" class="card-desc">hire team, manage burn,</text>
+    <text x="20" y="155" class="card-desc">survive crises &amp; pitch VCs.</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="80" y="565" class="footer-txt">100% IN-BROWSER • ZERO DEPENDENCIES • OPEN-SOURCE AT BUDOF.COM</text>
+</svg>

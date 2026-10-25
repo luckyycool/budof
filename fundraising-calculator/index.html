@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Fundraising Target &amp; Runway Extension Calculator | Budof</title>
+  <meta name="description" content="Calculate your startup fundraising round target, implied post-money valuation, cap table dilution, pre-money option pools, and the runway impact of new engineering hires.">
+  <meta name="keywords" content="fundraising target calculator, startup dilution calculator, cap table model, safe round calculator, option pool shuffle, hiring runway impact, pre-money post-money valuation">
+  <link rel="canonical" href="https://budof.com/fundraising-calculator/">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <!-- OpenGraph / Social Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://budof.com/fundraising-calculator/">
+  <meta property="og:title" content="Startup Fundraising Target &amp; Runway Extension Calculator | Budof">
+  <meta property="og:description" content="Model funding rounds, calculate founder cap table dilution, option pool expansions, and test hiring runway impacts. 100% in-browser.">
+  <meta property="og:site_name" content="Budof">
+  <meta property="og:image" content="https://budof.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Startup Fundraising Target &amp; Runway Extension Calculator | Budof">
+  <meta name="twitter:description" content="Free founder dilution and fundraising target calculator. Model SAFE rounds, option pools, and hiring impacts.">
+  <meta name="twitter:image" content="https://budof.com/og-image.png">
+
+  <!-- Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../styles.css">
+
+  <!-- Google AdSense Verification & Runtime Script -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0897820292119776" crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data: WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Startup Fundraising Target & Dilution Calculator",
+    "url": "https://budof.com/fundraising-calculator/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Calculators for sizing venture capital fundraising targets, modeling cap table equity dilution, option pool expansions, and estimating hiring runway impacts."
+  }
+  </script>
+
+  <!-- JSON-LD Structured Data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much capital should an early-stage startup raise?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Founders should raise enough capital to finance 18 to 24 months of operations plus a 20% safety margin. Sizing the round is determined by: Target Runway Months x Net Monthly Burn x (1 + Safety Buffer %). Raising significantly more causes unnecessary equity dilution, while raising less forces founders into continuous fundraising."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between pre-money and post-money valuation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pre-money valuation is the agreed worth of the company before receiving new investment. Post-money valuation is the pre-money valuation plus the new capital invested (Post = Pre + Investment). If your pre-money valuation is $4M and you raise $1M, the post-money valuation is $5M, and investors own 20% ($1M / $5M)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the 'option pool shuffle'?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In venture financings, investors frequently require creating or expanding an unallocated employee option pool (typically 10% to 15%) in the pre-money capitalization. This shifts 100% of the dilution onto the existing founders rather than sharing it between founders and new investors."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <a href="../" class="brand-wrapper" title="Budof Master Suite Hub">
+        <div class="brand-logo-mark">B</div>
+        <div class="brand-text">
+          <h1>BUDOF <span class="brand-pill">FINTECH SUITE</span></h1>
+          <p class="brand-tagline">Business Unit Dynamics &amp; Operational Finance</p>
+        </div>
+      </a>
+      <div class="header-actions">
+        <button id="btn-export-csv" class="btn-secondary" title="Download Model as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button id="btn-print-report" class="btn-primary" title="Print Executive PDF Report">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Executive PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="header-nav-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <a href="../" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Suite Hub
+        </a>
+        <a href="../runway-calculator/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Runway Forecaster
+        </a>
+        <a href="../saas-unit-economics/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          SaaS Unit Economics
+        </a>
+        <a href="../fundraising-calculator/" class="nav-tab-btn active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Founder Calculators
+        </a>
+        <a href="../saas-valuation/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          SaaS Benchmarks &amp; Valuation
+        </a>
+        <a href="../deals-perks/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+          Founder Perks &amp; Deals
+        </a>
+        <a href="../startup-tycoon/" class="nav-tab-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
+          Startup Tycoon Simulator
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Top Ad Slot -->
+  <div class="main-content" style="padding-bottom: 0;">
+    <div class="ad-slot-leaderboard" id="ad-top-slot">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:728px;height:90px"
+           data-ad-client="ca-pub-0897820292119776"
+           data-ad-slot="9812739102"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+
+  <main class="main-content">
+
+    <!-- Interactive Founder Calculators Section -->
+    <section id="tab-calculators" class="tab-panel active">
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+        
+        <!-- Calculator 1: Fundraising Target Sizer -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">1. Fundraising Target &amp; Buffer Sizer</h3>
+            <span class="card-subtitle">Calculate round target based on net burn</span>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="calc-target-months" class="form-label">Desired Runway Extension (Months)</label>
+              <span id="display-target-months" class="form-val-display mono">18 mos</span>
+            </div>
+            <input type="range" id="calc-target-months" class="range-slider" min="6" max="36" step="1" value="18">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="calc-safety-buffer" class="form-label">Volatility Safety Buffer %</label>
+              <span id="display-safety-buffer" class="form-val-display mono">20%</span>
+            </div>
+            <input type="range" id="calc-safety-buffer" class="range-slider" min="0" max="50" step="5" value="20">
+          </div>
+
+          <div style="background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Target Capital to Raise</div>
+            <div id="calc-res-total-raise" style="font-size: 26px; font-weight: 800; color: var(--emerald-primary); margin: 4px 0;" class="mono">$324,000</div>
+            <div style="font-size: 12px; color: var(--text-secondary);" id="calc-res-round-tier">Seed Stage (~15% Dilution)</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Implied Post-Money Valuation: <strong id="calc-res-implied-post" class="mono">$2,160,000</strong></div>
+          </div>
+        </div>
+
+        <!-- Calculator 2: Cap Table Equity Dilution -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">2. Cap Table Equity Dilution Model</h3>
+            <span class="card-subtitle">Pre vs Post-Money equity split</span>
+          </div>
+
+          <div class="form-group">
+            <label for="calc-pre-money" class="form-label">Pre-Money Valuation ($)</label>
+            <input type="number" id="calc-pre-money" class="input-num" value="5000000" step="250000">
+          </div>
+
+          <div class="form-group">
+            <label for="calc-investment" class="form-label">Investment Amount ($)</label>
+            <input type="number" id="calc-investment" class="input-num" value="1000000" step="100000">
+          </div>
+
+          <div class="form-group">
+            <label for="calc-option-pool" class="form-label">Unallocated Option Pool % (Pre-Money)</label>
+            <input type="number" id="calc-option-pool" class="input-num" value="10" step="1">
+          </div>
+
+          <div style="background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Post-Money Valuation:</span>
+              <strong id="calc-res-post-val" class="mono" style="color: var(--text-primary);">$6,000,000</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Founder Equity Retained:</span>
+              <strong id="calc-res-founder-eq" class="mono" style="color: var(--emerald-primary);">73.3%</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: var(--text-muted);">Investor Ownership:</span>
+              <strong id="calc-res-investor-eq" class="mono" style="color: var(--text-primary);">16.7% (+10% Pool)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator 3: Hiring Runway Impact -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">3. New Hire Runway Sensitivity</h3>
+            <span class="card-subtitle">Calculate runway lost before extending an offer</span>
+          </div>
+
+          <div class="form-group">
+            <label for="calc-new-salary" class="form-label">Monthly Base Salary ($)</label>
+            <input type="number" id="calc-new-salary" class="input-num" value="8500" step="500">
+          </div>
+
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+            Automatically factors in +15% employer FICA taxes, benefits, workers' comp, and standard software seat overhead.
+          </p>
+
+          <div style="background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Fully Loaded Monthly Cost:</span>
+              <strong id="calc-res-loaded-cost" class="mono" style="color: #DC2626;">$9,775/mo</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 12px; color: var(--text-muted);">Runway Reduction:</span>
+              <strong id="calc-res-runway-lost" class="mono" style="color: #DC2626;">-2.4 months</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px; color: var(--text-muted);">Breakeven MRR Required:</span>
+              <strong id="calc-res-breakeven-mrr" class="mono" style="color: var(--emerald-primary);">+$9,775 MRR</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Deep SEO Content & Cap Table Guide -->
+    <section class="seo-content-section">
+      <article class="seo-guide-container">
+        
+        <header class="seo-article-header">
+          <h2 class="seo-article-title">The Founder's Masterclass in Startup Fundraising, Cap Table Math &amp; Equity Dilution</h2>
+          <p class="seo-article-lead">Raising venture capital is not a measure of success; it is a sale of company ownership under specific legal and economic constraints. Below is the institutional framework for sizing rounds, negotiating pre-money valuations, and protecting founder equity from excessive dilution.</p>
+        </header>
+
+        <h3 class="seo-h2">1. Round Sizing: How Much Capital Should You Raise?</h3>
+        <p class="seo-p">The goal of any venture round is simple: <strong>buy enough time to achieve the milestones required for the next round or reach sovereign profitability</strong>. Top founders use the following calculation:</p>
+
+        <div class="formula-box">
+          <div class="formula-label">Round Sizing Formula</div>
+          Capital Target = Desired Runway (18 – 24 Months) × Monthly Net Burn × (1 + Volatility Buffer %)
+          <br><br>
+          <div class="formula-label">Example Scenario</div>
+          If your company burns $25,000 net per month and needs 20 months of runway with a 20% safety margin:
+          <br>
+          Target Raise = 20 × $25,000 × 1.20 = <strong>$600,000</strong>
+        </div>
+
+        <h3 class="seo-h2">2. Pre-Money vs. Post-Money Valuation Mechanics</h3>
+        <p class="seo-p">Confusion between pre-money and post-money valuations causes founders thousands of basis points of unintended dilution:</p>
+        
+        <table class="benchmark-data-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Formula</th>
+              <th>Example ($4M Pre + $1M Investment)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Pre-Money Valuation</strong></td>
+              <td>Agreed enterprise value prior to wire transfer</td>
+              <td>$4,000,000</td>
+            </tr>
+            <tr>
+              <td><strong>Investment Amount</strong></td>
+              <td>New cash injected into corporate treasury</td>
+              <td>$1,000,000</td>
+            </tr>
+            <tr>
+              <td><strong>Post-Money Valuation</strong></td>
+              <td>Pre-Money + Investment Amount</td>
+              <td>$5,000,000</td>
+            </tr>
+            <tr>
+              <td><strong>Investor Ownership %</strong></td>
+              <td>Investment Amount ÷ Post-Money Valuation</td>
+              <td>$1M ÷ $5M = <strong>20.0%</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Founder Retained %</strong></td>
+              <td>Pre-Money Valuation ÷ Post-Money Valuation</td>
+              <td>$4M ÷ $5M = <strong>80.0%</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="seo-h2">3. The "Option Pool Shuffle" Unveiled</h3>
+        <p class="seo-p">When venture capitalists issue a term sheet, they almost always require an unallocated employee option pool (typically 10% to 15%) to be created <strong>in the pre-money valuation</strong>. This legal mechanism ensures that 100% of the dilution from creating the employee pool is absorbed by the existing founders, reducing the founders' effective valuation.</p>
+
+        <h3 class="seo-h2">4. 5 Golden Rules for Cap Table Management</h3>
+        <div class="guide-step-grid">
+          <div class="guide-step-card">
+            <div class="guide-step-num">1</div>
+            <h4>Target 15%–20% Dilution Per Round</h4>
+            <p>Giving away more than 20% to 25% in a single Seed or Series A round depresses founder ownership too quickly, leaving inadequate equity for Series B and C.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">2</div>
+            <h4>Use Standard Post-Money SAFEs</h4>
+            <p>Y Combinator post-money SAFEs provide immediate clarity on dilution. Pre-money SAFEs can stack unpredictably, diluting founders exponentially.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">3</div>
+            <h4>File 83(b) Tax Elections Within 30 Days</h4>
+            <p>Missing the strict 30-day IRS deadline for your 83(b) election when purchasing founder stock can create disastrous phantom income tax liabilities later.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="guide-step-num">4</div>
+            <h4>Model Headcount Before Hiring</h4>
+            <p>Every $10k/month engineering hire represents $138,000 in annual burn after loaded payroll taxes. Always compute the runway impact before issuing an offer letter.</p>
+          </div>
+        </div>
+
+        <h3 class="seo-h2">Frequently Asked Questions</h3>
+        <div class="faq-item open">
+          <button class="faq-question">
+            <span>What is a SAFE valuation cap vs a discount?</span>
+            <span style="font-size:16px; font-weight:700;">−</span>
+          </button>
+          <div class="faq-answer">A valuation cap sets the maximum effective company valuation at which a SAFE will convert into preferred stock in the next priced round. A discount gives the SAFE holder a percentage discount (usually 15% to 20%) relative to the price paid by new investors. Most modern Silicon Valley angel rounds utilize valuation caps without discounts.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>How much equity should founders retain by Series A?</span>
+            <span style="font-size:16px; font-weight:700;">+</span>
+          </button>
+          <div class="faq-answer">By the conclusion of a priced Series A round, a founding team should collectively retain between 50% and 65% of the total company capitalization. Retaining less than 40% prior to Series B risks founder demotivation in the eyes of later-stage institutional investors.</div>
+        </div>
+
+      </article>
+    </section>
+
+  </main>
+
+  <!-- Legal Modal -->
+  <div id="legal-modal-overlay" class="modal-overlay">
+    <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
+      <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
+      <div id="legal-modal-content" class="modal-body"></div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
+      </div>
+      <div class="footer-links">
+        <a href="../" class="footer-tab-link">Suite Hub</a>
+        <a href="../runway-calculator/" class="footer-tab-link">Runway Calculator</a>
+        <a href="../saas-unit-economics/" class="footer-tab-link">SaaS CAC/LTV</a>
+        <a href="../fundraising-calculator/" class="footer-tab-link" style="color:var(--emerald-primary); font-weight:700;">Founder Calculators</a>
+        <a href="../saas-valuation/" class="footer-tab-link">SaaS Benchmarks</a>
+        <a href="../deals-perks/" class="footer-tab-link">Founder Perks</a>
+        <a href="../startup-tycoon/" class="footer-tab-link">Startup Game</a>
+        <a href="#" id="link-privacy">Privacy Policy</a>
+        <a href="#" id="link-terms">Terms of Use</a>
+        <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../bundle.js"></script>
+</body>
+</html>
