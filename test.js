@@ -4,14 +4,16 @@
  */
 
 import assert from 'node:assert';
+import fs from 'node:fs';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatMonths } from './js/utils/formatters.js';
 import { calculateRunway, TAX_BENEFITS_MULTIPLIER } from './js/engine/runway-simulator.js';
 import { calculateUnitEconomics } from './js/engine/unit-economics.js';
 import { calculatePricingTiers } from './js/engine/pricing-calculator.js';
+import { INDUSTRY_PRESETS } from './js/engine/presets.js';
+import { SAAS_BENCHMARKS, calculateSaaSValuation } from './js/engine/valuation.js';
+import { SoundEngine } from './js/engine/audio.js';
 import { TycoonGame } from './js/engine/tycoon-game.js';
 import { STARTUP_EVENTS } from './js/engine/tycoon-events.js';
-
-import fs from 'node:fs';
 
 let passedTests = 0;
 
@@ -55,8 +57,6 @@ test('Runway Simulator: Calculates zero-cash month when Net Burn > 0', () => {
     ]
   });
 
-  // Gross burn = 8050 + 2000 = 10050. Net burn = 10050 - 5000 = 5050/mo.
-  // Starting cash 50000 / 5050 = ~9.9 months
   assert.strictEqual(result.isDefaultAlive, false);
   assert.ok(result.runwayMonths >= 9.8 && result.runwayMonths <= 10.0, `Expected ~9.9 months, got ${result.runwayMonths}`);
   assert.strictEqual(result.zeroCashMonth, 10);
@@ -66,15 +66,13 @@ test('Runway Simulator: Accurately flags "Default Alive" when revenue outpaces b
   const result = calculateRunway({
     startingCash: 200000,
     currentMRR: 8000,
-    monthlyGrowthRate: 0.15, // 15% monthly growth
+    monthlyGrowthRate: 0.15,
     monthlyOpEx: 3000,
     headcount: [
-      { id: '1', role: 'Engineer', monthlySalary: 6000, startMonth: 1 } // 6900
+      { id: '1', role: 'Engineer', monthlySalary: 6000, startMonth: 1 }
     ]
   });
 
-  // Initial gross burn = 6900 + 3000 = 9900.
-  // With 15% growth, revenue will cross 9900 within 2-3 months while cash is still ~$195k+
   assert.strictEqual(result.isDefaultAlive, true);
   assert.strictEqual(result.zeroCashMonth, null);
   assert.ok(result.breakevenMonth <= 4, `Expected breakeven within 4 months, got ${result.breakevenMonth}`);
@@ -92,7 +90,6 @@ test('Runway Simulator: Applies 15% tax/benefit overhead correctly', () => {
     ]
   });
 
-  // Payroll = 10000 * 1.15 = 11500
   assert.strictEqual(result.monthlyProjections[0].payroll, 11500);
   assert.strictEqual(result.monthlyProjections[0].netBurn, 11500);
 });
@@ -102,14 +99,10 @@ test('Unit Economics: Computes LTV, LTV:CAC, and Payback accurately', () => {
   const result = calculateUnitEconomics({
     cac: 600,
     arpu: 100,
-    grossMarginPct: 80, // 80%
-    monthlyChurnPct: 2.5 // 2.5%
+    grossMarginPct: 80,
+    monthlyChurnPct: 2.5
   });
 
-  // Lifetime = 1 / 0.025 = 40 months
-  // LTV = (100 * 0.8) / 0.025 = 80 / 0.025 = $3,200
-  // LTV:CAC = 3200 / 600 = 5.33x
-  // Payback = 600 / (100 * 0.8) = 600 / 80 = 7.5 months
   assert.strictEqual(result.customerLifetimeMonths, 40);
   assert.strictEqual(result.ltv, 3200);
   assert.strictEqual(result.ltvCacRatio, 5.33);
@@ -130,8 +123,6 @@ test('Unit Economics: Handles Magic Number and Rule of 40', () => {
     fcfMarginPct: 5
   });
 
-  // Magic Number = 65000 / 50000 = 1.30
-  // Rule of 40 = 45 + 5 = 50%
   assert.strictEqual(result.magicNumber, 1.3);
   assert.strictEqual(result.ruleOf40Score, 50);
   assert.strictEqual(result.meetsRuleOf40, true);
@@ -142,7 +133,7 @@ test('Unit Economics: Safeguards against 0% churn divide-by-zero', () => {
     cac: 500,
     arpu: 50,
     grossMarginPct: 80,
-    monthlyChurnPct: 0 // Boundary condition
+    monthlyChurnPct: 0
   });
 
   assert.ok(!isNaN(result.ltv));
@@ -160,18 +151,58 @@ test('Pricing Calculator: Tier distribution and annual discounting', () => {
     proShare: 30,
     enterprisePrice: 300,
     enterpriseShare: 10,
-    annualDiscountPct: 20, // 20% off
-    annualAdoptionPct: 30  // 30% choose annual
+    annualDiscountPct: 20,
+    annualAdoptionPct: 30
   });
 
-  // Blended monthly ARPU = (0.6*30) + (0.3*80) + (0.1*300) = 18 + 24 + 30 = 72
   assert.strictEqual(result.blendedMonthlyARPU, 72);
   assert.ok(result.mrr > 0);
   assert.ok(result.upfrontAnnualCash > 0);
   assert.strictEqual(result.tiers.length, 3);
 });
 
-// 5. Tycoon State Machine Tests
+// 5. Industry Presets Tests
+test('Industry Presets: 5 verified production templates exist', () => {
+  const presetKeys = Object.keys(INDUSTRY_PRESETS);
+  assert.strictEqual(presetKeys.length, 5);
+  for (const key of presetKeys) {
+    const p = INDUSTRY_PRESETS[key];
+    assert.ok(p.id, `Preset ${key} must have id`);
+    assert.ok(p.name, `Preset ${key} must have name`);
+    assert.ok(p.startingCash > 0, `Preset ${key} startingCash must be > 0`);
+    assert.ok(p.currentMRR > 0, `Preset ${key} currentMRR must be > 0`);
+    assert.ok(p.headcount.length > 0, `Preset ${key} headcount must have entries`);
+    assert.ok(p.unitEconomics, `Preset ${key} unitEconomics must exist`);
+  }
+});
+
+// 6. SaaS Benchmarks & Valuation Tests
+test('SaaS Benchmarks: Verified industry percentiles', () => {
+  assert.strictEqual(SAAS_BENCHMARKS.length, 6);
+  for (const b of SAAS_BENCHMARKS) {
+    assert.ok(b.metric);
+    assert.ok(b.topQuartile);
+    assert.ok(b.median);
+    assert.ok(b.bottomQuartile);
+  }
+
+  const val = calculateSaaSValuation(1000000, 60, 45);
+  assert.ok(val.valuationBear > 0);
+  assert.ok(val.valuationBase > val.valuationBear);
+  assert.ok(val.valuationBull > val.valuationBase);
+});
+
+// 7. Procedural Sound Engine Tests
+test('Sound Engine: Methods defined for UI & Tycoon audio feedback', () => {
+  const sound = new SoundEngine();
+  assert.strictEqual(typeof sound.toggleMute, 'function');
+  assert.strictEqual(typeof sound.playTurnTick, 'function');
+  assert.strictEqual(typeof sound.playCashRegister, 'function');
+  assert.strictEqual(typeof sound.playCrisisChime, 'function');
+  assert.strictEqual(typeof sound.playVictoryJingle, 'function');
+});
+
+// 8. Tycoon State Machine Tests
 test('Tycoon Engine: Initializes with valid initial values', () => {
   const game = new TycoonGame();
   assert.strictEqual(game.month, 1);
@@ -191,7 +222,6 @@ test('Tycoon Engine: Hire and Fire team members', () => {
   game.fire('engineers');
   assert.strictEqual(game.team.engineers, initialEngineers);
 
-  // Cannot fire last founder
   game.fire('founders');
   assert.strictEqual(game.team.founders, 1);
   const fired = game.fire('founders');
@@ -201,7 +231,6 @@ test('Tycoon Engine: Hire and Fire team members', () => {
 
 test('Tycoon Engine: Advance turns and simulate cash depletion', () => {
   const game = new TycoonGame({ startingCash: 5000, startingMRR: 100 });
-  // Spend heavy marketing to force cash depletion
   game.setBudget('marketing', 10000);
 
   let turns = 0;
@@ -216,11 +245,9 @@ test('Tycoon Engine: Advance turns and simulate cash depletion', () => {
 
 test('Tycoon Engine: Angel round criteria and dilution', () => {
   const game = new TycoonGame({ startingCash: 50000, startingMRR: 1000 });
-  // Try pitching with only $1k MRR (should fail)
   const reject = game.pitchInvestors('angel');
   assert.strictEqual(reject.success, false);
 
-  // Boost MRR to $3500 and pitch again
   game.mrr = 3500;
   game.productQuality = 60;
   const accept = game.pitchInvestors('angel');
@@ -229,7 +256,7 @@ test('Tycoon Engine: Angel round criteria and dilution', () => {
   assert.strictEqual(game.equityDilutionPct, 8);
 });
 
-// 6. Startup Events Tests
+// 9. Startup Events Tests
 test('Startup Events Library: Valid configuration and options', () => {
   assert.ok(STARTUP_EVENTS.length >= 10, 'Must have at least 10 startup events');
   for (const evt of STARTUP_EVENTS) {
@@ -241,15 +268,43 @@ test('Startup Events Library: Valid configuration and options', () => {
   }
 });
 
-// 7. Static Asset & SEO Integrity Tests
-test('Static Assets: index.html has complete metadata & schema', () => {
+// 10. Static Asset & Bundle Integrity Tests
+test('DOM IDs: All getElementById references in bundle.js exist in index.html', () => {
+  const html = fs.readFileSync('./index.html', 'utf-8');
+  const bundle = fs.readFileSync('./bundle.js', 'utf-8');
+
+  const idMatches = bundle.matchAll(/document\.getElementById\(['"]([^'"]+)['"]\)/g);
+  const usedIds = new Set();
+  for (const m of idMatches) {
+    usedIds.add(m[1]);
+  }
+
+  const missingIds = [];
+  for (const id of usedIds) {
+    if (!html.includes(`id="${id}"`) && !html.includes(`id='${id}'`)) {
+      missingIds.push(id);
+    }
+  }
+
+  assert.strictEqual(missingIds.length, 0, `Missing DOM IDs in index.html: ${missingIds.join(', ')}`);
+});
+
+test('Static Assets: index.html has complete metadata, presets, schema & bundle reference', () => {
   assert.ok(fs.existsSync('./index.html'), 'index.html must exist');
   const html = fs.readFileSync('./index.html', 'utf-8');
   assert.ok(html.includes('<title>Budof'), 'index.html must have Budof title');
   assert.ok(html.includes('https://budof.com/'), 'Canonical URL must point to budof.com');
   assert.ok(html.includes('schema.org'), 'Must include JSON-LD schema');
   assert.ok(html.includes('id="runway-canvas"'), 'Must include canvas element');
-  assert.ok(html.includes('id="ad-top-slot"'), 'Must include ad-top-slot element');
+  assert.ok(html.includes('id="presets-pills-bar"'), 'Must include presets pills element');
+  assert.ok(html.includes('src="bundle.js"'), 'Must link to self-contained bundle.js for file:/// support');
+});
+
+test('Static Assets: Compiled bundle.js exists and is valid', () => {
+  assert.ok(fs.existsSync('./bundle.js'), 'bundle.js must exist');
+  const bundle = fs.readFileSync('./bundle.js', 'utf-8');
+  assert.ok(bundle.includes('Budof Standalone Production Bundle'), 'Must be compiled standalone bundle');
+  assert.ok(bundle.length > 50000, 'Bundle must contain all engines');
 });
 
 test('Static Assets: Swiss Daylight styles.css integrity', () => {
@@ -257,6 +312,7 @@ test('Static Assets: Swiss Daylight styles.css integrity', () => {
   const css = fs.readFileSync('./styles.css', 'utf-8');
   assert.ok(css.includes('--bg-canvas: #FBFBF9;'), 'Must define Swiss Alabaster #FBFBF9');
   assert.ok(css.includes('--emerald-primary: #059669;'), 'Must define Emerald primary #059669');
+  assert.ok(css.includes('.presets-bar-wrapper'), 'Must include presets styling');
   assert.ok(css.includes('@media print'), 'Must provide executive print stylesheet');
 });
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Budof — Startup Runway & Burn Rate Simulator | SaaS Unit Economics & Tycoon Game</title>
   <meta name="description" content="Free, 100% in-browser startup runway simulator, SaaS unit economics calculator (CAC, LTV, Magic Number, Rule of 40), and 24-month startup tycoon business simulation.">
-  <meta name="keywords" content="startup runway calculator, burn rate simulator, saas unit economics, cac payback period, ltv cac calculator, magic number saas, rule of 40, startup tycoon game">
+  <meta name="keywords" content="startup runway calculator, burn rate simulator, saas unit economics, cac payback period, ltv cac calculator, magic number saas, rule of 40, startup tycoon game, saas valuation multiple">
   <link rel="canonical" href="https://budof.com/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
@@ -13,11 +13,11 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://budof.com/">
   <meta property="og:title" content="Budof — Startup Runway & Financial Simulation Suite">
-  <meta property="og:description" content="Model 36-month startup burn, SaaS unit economics, and test your founder skills in the 24-month Startup Tycoon game. Free, zero registration.">
+  <meta property="og:description" content="Model 36-month startup burn, SaaS unit economics, valuation multiples, and test your founder skills in the 24-month Startup Tycoon game. Free, zero registration.">
   <meta property="og:site_name" content="Budof">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Budof — Startup Runway & SaaS Financial Modeling">
-  <meta name="twitter:description" content="Calculate your zero-cash date, LTV:CAC, and test your founder survival in the browser.">
+  <meta name="twitter:description" content="Calculate your zero-cash date, LTV:CAC, valuation multiples, and test your founder survival in the browser.">
 
   <!-- Typography: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "Interactive startup runway calculator, SaaS unit economics engine, and turn-based startup tycoon simulation game."
+    "description": "Interactive startup runway calculator, SaaS unit economics engine, valuation multiple estimator, and turn-based startup tycoon simulation game."
   }
   </script>
 </head>
@@ -83,6 +83,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Tier Pricing & MRR Elasticity
         </button>
+        <button class="nav-tab-btn" data-tab="tab-benchmarks">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          SaaS Benchmarks & Valuation
+        </button>
         <button class="nav-tab-btn" data-tab="tab-tycoon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><path d="M11 9h2v6h-2z"/></svg>
           Startup Tycoon Simulator
@@ -91,10 +95,12 @@
     </nav>
   </header>
 
-  <!-- Top Ad Slot (Fixed 728x90, CLS = 0) -->
+  <!-- Top Sponsor & Ad Slot (Fixed 728x90, CLS = 0) -->
   <div class="main-content" style="padding-bottom: 0;">
     <div class="ad-slot-leaderboard" id="ad-top-slot">
-      <span>Sponsored Financial Solutions • 728x90 Advertisement Slot (Google AdSense)</span>
+      <div style="text-align: center; font-size: 11px;">
+        <span style="font-weight: 700; color: #059669; text-transform: uppercase;">Founder Financial Toolkit</span> • Verified B2B SaaS Banking, High-Yield Treasury & Payroll
+      </div>
     </div>
   </div>
 
@@ -102,6 +108,18 @@
 
     <!-- TAB 1: RUNWAY & BURN FORECASTER -->
     <section id="tab-runway" class="tab-panel active">
+      
+      <!-- Presets Bar (1-Click Real-World Models) -->
+      <div class="presets-bar-wrapper">
+        <div class="presets-label">⚡ 1-Click Industry Financial Models (Pre-Loaded Verified Benchmarks)</div>
+        <div id="presets-pills-bar" class="presets-pills-bar">
+          <!-- Populated dynamically via presets.js -->
+        </div>
+        <div id="preset-status-banner" class="preset-status-banner">
+          Loaded Verified Financial Template: <strong>Bootstrapped Default Alive</strong> (Lean Team • Profitable • Zero VC Dilution)
+        </div>
+      </div>
+
       <div class="workbench-grid">
         
         <!-- Sidebar Controls -->
@@ -115,33 +133,33 @@
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-starting-cash" class="form-label">Starting Cash Reserve</label>
-                <span id="display-starting-cash" class="form-val-display mono">$250,000</span>
+                <span id="display-starting-cash" class="form-val-display mono">$180,000</span>
               </div>
-              <input type="range" id="input-starting-cash" class="range-slider" min="10000" max="2000000" step="10000" value="250000">
+              <input type="range" id="input-starting-cash" class="range-slider" min="10000" max="3000000" step="10000" value="180000">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-current-mrr" class="form-label">Current MRR</label>
-                <span id="display-current-mrr" class="form-val-display mono">$10,000</span>
+                <span id="display-current-mrr" class="form-val-display mono">$42,000</span>
               </div>
-              <input type="range" id="input-current-mrr" class="range-slider" min="0" max="150000" step="1000" value="10000">
+              <input type="range" id="input-current-mrr" class="range-slider" min="0" max="250000" step="1000" value="42000">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-growth-rate" class="form-label">Monthly MRR Growth</label>
-                <span id="display-growth-rate" class="form-val-display mono">8.0%</span>
+                <span id="display-growth-rate" class="form-val-display mono">5.0%</span>
               </div>
-              <input type="range" id="input-growth-rate" class="range-slider" min="-10" max="40" step="0.5" value="8.0">
+              <input type="range" id="input-growth-rate" class="range-slider" min="-10" max="40" step="0.5" value="5.0">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-monthly-opex" class="form-label">Base OpEx (Software & Cloud)</label>
-                <span id="display-monthly-opex" class="form-val-display mono">$4,000</span>
+                <span id="display-monthly-opex" class="form-val-display mono">$6,500</span>
               </div>
-              <input type="range" id="input-monthly-opex" class="range-slider" min="500" max="35000" step="500" value="4000">
+              <input type="range" id="input-monthly-opex" class="range-slider" min="500" max="50000" step="500" value="6500">
             </div>
           </div>
 
@@ -157,15 +175,20 @@
             </div>
 
             <div style="margin-top: 14px; display: flex; gap: 8px;">
-              <input type="text" id="new-hire-role" placeholder="Role (e.g. Frontend Dev)" class="input-num" style="font-size: 12px; flex: 1;">
+              <input type="text" id="new-hire-role" placeholder="Role (e.g. Sales Rep)" class="input-num" style="font-size: 12px; flex: 1;">
               <input type="number" id="new-hire-salary" placeholder="$ / Mo" class="input-num" style="width: 80px; font-size: 12px;" value="6000">
               <button id="btn-add-hire" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">+ Add</button>
             </div>
           </div>
 
-          <!-- Ad Unit in Sidebar (300x250 CLS = 0) -->
+          <!-- Sidebar Sponsor Card -->
           <div class="ad-slot-rectangle">
-            <span>Sidebar Financial Ad (300x250)</span>
+            <div style="text-align: center; padding: 16px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 6px;">Sponsored Solution</div>
+              <strong style="font-size: 13px; color: #0F172A;">Need High-Yield Treasury on Idle Cash?</strong>
+              <p style="font-size: 11px; color: #64748B; margin: 8px 0 12px 0;">Earn 4.5%–5.0% APY on business reserves with Mercury & Brex.</p>
+              <a href="https://mercury.com/" target="_blank" rel="noopener sponsored" class="btn-primary" style="font-size: 11px; padding: 6px 12px; text-decoration: none;">View Rates ➔</a>
+            </div>
           </div>
         </aside>
 
@@ -176,19 +199,19 @@
           <div class="kpi-row">
             <div class="kpi-card highlight">
               <div class="kpi-label">Runway Remaining</div>
-              <div id="kpi-runway-months" class="kpi-value green mono">18.4 mos</div>
-              <div id="kpi-runway-subtext" class="kpi-subtext">Estimated Zero-Cash Date</div>
+              <div id="kpi-runway-months" class="kpi-value green mono">Default Alive (∞)</div>
+              <div id="kpi-runway-subtext" class="kpi-subtext">Infinite Runway (Profitable before zero)</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-label">Current Net Burn</div>
-              <div id="kpi-net-burn" class="kpi-value crimson mono">-$11,250</div>
-              <div class="kpi-subtext">Gross Burn minus Revenue</div>
+              <div id="kpi-net-burn" class="kpi-value green mono">$16,550</div>
+              <div class="kpi-subtext">Monthly Net Cash Flow</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-label">Breakeven Status</div>
-              <div id="kpi-breakeven-status" class="kpi-value mono" style="font-size: 20px;">Month 14</div>
+              <div id="kpi-breakeven-status" class="kpi-value green mono" style="font-size: 20px;">Profitable (M1)</div>
               <div id="kpi-breakeven-subtext" class="kpi-subtext">Revenue crosses Burn</div>
             </div>
 
@@ -274,33 +297,33 @@
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-cac" class="form-label">CAC (Blended Cost)</label>
-                <span id="display-cac" class="form-val-display mono">$500</span>
+                <span id="display-cac" class="form-val-display mono">$480</span>
               </div>
-              <input type="range" id="input-cac" class="range-slider" min="50" max="5000" step="50" value="500">
+              <input type="range" id="input-cac" class="range-slider" min="20" max="5000" step="20" value="480">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-arpu" class="form-label">Monthly ARPU</label>
-                <span id="display-arpu" class="form-val-display mono">$80</span>
+                <span id="display-arpu" class="form-val-display mono">$89</span>
               </div>
-              <input type="range" id="input-arpu" class="range-slider" min="10" max="1500" step="10" value="80">
+              <input type="range" id="input-arpu" class="range-slider" min="5" max="1500" step="5" value="89">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-gross-margin" class="form-label">Gross Margin %</label>
-                <span id="display-gross-margin" class="form-val-display mono">80%</span>
+                <span id="display-gross-margin" class="form-val-display mono">88%</span>
               </div>
-              <input type="range" id="input-gross-margin" class="range-slider" min="20" max="95" step="1" value="80">
+              <input type="range" id="input-gross-margin" class="range-slider" min="20" max="98" step="1" value="88">
             </div>
 
             <div class="form-group">
               <div class="form-label-row">
                 <label for="input-churn-rate" class="form-label">Monthly Churn Rate %</label>
-                <span id="display-churn-rate" class="form-val-display mono">2.5%</span>
+                <span id="display-churn-rate" class="form-val-display mono">1.9%</span>
               </div>
-              <input type="range" id="input-churn-rate" class="range-slider" min="0.5" max="15" step="0.1" value="2.5">
+              <input type="range" id="input-churn-rate" class="range-slider" min="0.5" max="15" step="0.1" value="1.9">
             </div>
           </div>
 
@@ -312,22 +335,22 @@
 
             <div class="form-group">
               <label for="input-sm-spend" class="form-label">Quarterly S&M Spend ($)</label>
-              <input type="number" id="input-sm-spend" class="input-num" value="45000">
+              <input type="number" id="input-sm-spend" class="input-num" value="8000">
             </div>
 
             <div class="form-group">
               <label for="input-net-arr" class="form-label">Net New ARR Added ($)</label>
-              <input type="number" id="input-net-arr" class="input-num" value="60000">
+              <input type="number" id="input-net-arr" class="input-num" value="22000">
             </div>
 
             <div class="form-group">
               <label for="input-annual-growth" class="form-label">Annual Revenue Growth %</label>
-              <input type="number" id="input-annual-growth" class="input-num" value="55">
+              <input type="number" id="input-annual-growth" class="input-num" value="45">
             </div>
 
             <div class="form-group">
               <label for="input-fcf-margin" class="form-label">Free Cash Flow Margin %</label>
-              <input type="number" id="input-fcf-margin" class="input-num" value="-5">
+              <input type="number" id="input-fcf-margin" class="input-num" value="18">
             </div>
           </div>
         </aside>
@@ -338,31 +361,31 @@
           <div class="kpi-row">
             <div class="kpi-card highlight">
               <div class="kpi-label">LTV : CAC Ratio</div>
-              <div id="kpi-ltv-cac" class="kpi-value green mono">5.12x</div>
+              <div id="kpi-ltv-cac" class="kpi-value green mono">8.58x</div>
               <div class="kpi-subtext">Benchmark: &gt;3.0x is Healthy</div>
             </div>
 
             <div class="kpi-card highlight">
               <div class="kpi-label">CAC Payback Period</div>
-              <div id="kpi-payback-months" class="kpi-value green mono">7.8 mos</div>
+              <div id="kpi-payback-months" class="kpi-value green mono">6.1 mos</div>
               <div class="kpi-subtext">Benchmark: &lt;12 mos is Elite</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-label">Customer Lifetime Value</div>
-              <div id="kpi-ltv-val" class="kpi-value mono">$2,560</div>
-              <div id="kpi-lifetime-subtext" class="kpi-subtext">Avg 40.0 months lifespan</div>
+              <div id="kpi-ltv-val" class="kpi-value mono">$4,122</div>
+              <div id="kpi-lifetime-subtext" class="kpi-subtext">Avg 52.6 months lifespan</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-label">Magic Number</div>
-              <div id="kpi-magic-number" class="kpi-value green mono">1.33</div>
+              <div id="kpi-magic-number" class="kpi-value green mono">2.75</div>
               <div class="kpi-subtext">Sales Efficiency Indicator</div>
             </div>
 
             <div class="kpi-card">
               <div class="kpi-label">Rule of 40 Score</div>
-              <div id="kpi-rule-of-40" class="kpi-value green mono">50.0%</div>
+              <div id="kpi-rule-of-40" class="kpi-value green mono">63.0%</div>
               <div id="kpi-rule-subtext" class="kpi-subtext">Elite Venture Benchmark Met</div>
             </div>
           </div>
@@ -495,13 +518,106 @@
       </div>
     </section>
 
-    <!-- TAB 4: STARTUP TYCOON SIMULATOR (24-MONTH GAME) -->
+    <!-- TAB 4: SAAS BENCHMARKS & VALUATION ENCYCLOPEDIA -->
+    <section id="tab-benchmarks" class="tab-panel">
+      
+      <!-- Interactive Valuation Multiple Estimator -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">SaaS Enterprise Valuation Estimator</h3>
+            <p class="card-subtitle">Real-world private & public venture revenue multiples (ARR x Growth & Rule of 40)</p>
+          </div>
+        </div>
+
+        <div class="valuation-slider-grid">
+          <div class="form-group">
+            <label for="val-arr-input" class="form-label">Current ARR ($)</label>
+            <input type="number" id="val-arr-input" class="input-num" value="500000" step="50000">
+          </div>
+          <div class="form-group">
+            <label for="val-growth-input" class="form-label">Annual Growth Rate %</label>
+            <input type="number" id="val-growth-input" class="input-num" value="50" step="5">
+          </div>
+          <div class="form-group">
+            <label for="val-r40-input" class="form-label">Rule of 40 Score %</label>
+            <input type="number" id="val-r40-input" class="input-num" value="35" step="5">
+          </div>
+        </div>
+
+        <div class="valuation-pill-row">
+          <div class="val-pill-card">
+            <div class="val-pill-title">Conservative (Bear)</div>
+            <div id="val-result-bear" class="val-pill-amount mono">$2.8M (5.6x)</div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Down-market liquidity environment</div>
+          </div>
+
+          <div class="val-pill-card base">
+            <div class="val-pill-title" style="color: #047857;">Target (Baseline)</div>
+            <div id="val-result-base" class="val-pill-amount mono">$3.8M (7.5x)</div>
+            <div style="font-size: 11px; color: #047857; margin-top: 4px;">Standard Series A/B term sheet multiple</div>
+          </div>
+
+          <div class="val-pill-card">
+            <div class="val-pill-title">Aggressive (Bull)</div>
+            <div id="val-result-bull" class="val-pill-amount mono">$5.1M (10.1x)</div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Top-tier Silicon Valley competitive round</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SaaS Benchmark Matrix Table -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Verified SaaS Performance Benchmarks</h3>
+            <p class="card-subtitle">Industry percentiles based on 500+ private and publicly traded B2B software companies</p>
+          </div>
+        </div>
+
+        <div class="benchmarks-table-container">
+          <table class="benchmarks-table">
+            <thead>
+              <tr>
+                <th>Efficiency Metric & Definition</th>
+                <th>Top Quartile (75th %)</th>
+                <th>Median (50th %)</th>
+                <th>Bottom Quartile (25th %)</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarks-table-body">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Paul Graham's Default Alive Guide -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Paul Graham’s "Default Alive" Framework Explained</h3>
+        </div>
+        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+          <p>In his famous 2015 essay, Y Combinator founder Paul Graham asked startup founders a simple question: <em>"Are you default alive or default dead?"</em></p>
+          <br>
+          <p><strong>The Equation:</strong> If your monthly revenue continues growing at its current percentage, will revenue surpass your monthly gross burn before your bank balance hits zero? If <strong>YES</strong>, you are <strong>Default Alive</strong> — you can survive without external venture funding. If <strong>NO</strong>, you are <strong>Default Dead</strong> — unless you raise more capital or cut expenses, your company will perish on a fixed date.</p>
+          <br>
+          <p>Budof runs this exact calculation dynamically across a 36-month horizon, showing you the exact month your startup achieves self-sustainability or when you must make strategic headcount adjustments.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 5: STARTUP TYCOON SIMULATOR (24-MONTH GAME) -->
     <section id="tab-tycoon" class="tab-panel">
       
       <!-- Tycoon Top HUD -->
       <div class="tycoon-hud">
         <div class="hud-tile">
-          <div class="hud-tile-title">Timeline</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="hud-tile-title">Timeline</div>
+            <button id="btn-tycoon-audio" class="btn-secondary" style="padding: 2px 6px; font-size: 10px;">🔊 Sound: On</button>
+          </div>
           <div id="tycoon-hud-month" class="hud-tile-val mono green">Month 1 / 24</div>
         </div>
 
@@ -529,6 +645,11 @@
           <div class="hud-tile-title">Product Quality</div>
           <div id="tycoon-hud-quality" class="hud-tile-val mono">65 / 100</div>
         </div>
+      </div>
+
+      <!-- 24-Month Progress Track -->
+      <div class="tycoon-progress-track" title="Journey to Month 24 ($1M ARR or Self-Sustaining)">
+        <div id="tycoon-progress-bar" class="tycoon-progress-bar"></div>
       </div>
 
       <div class="workbench-grid">
@@ -615,6 +736,21 @@
             </div>
           </div>
 
+          <!-- Cap Table Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Cap Table & Equity Dilution</h3>
+            </div>
+            <div class="cap-table-row">
+              <span>Founder Ownership:</span>
+              <strong id="cap-founder-equity" class="mono green">100%</strong>
+            </div>
+            <div class="cap-table-row">
+              <span>Investor Dilution:</span>
+              <strong id="cap-investor-equity" class="mono">0%</strong>
+            </div>
+          </div>
+
           <!-- Tycoon Action Bar -->
           <div class="tycoon-actions-bar">
             <button id="btn-reset-game" class="btn-secondary">Reset Journey</button>
@@ -698,13 +834,30 @@
     </div>
   </div>
 
-  <!-- Legal / Compliance Modal -->
+  <!-- Legal & Compliance Modal -->
   <div id="legal-modal-overlay" class="modal-overlay">
     <div class="modal-window" style="max-height: 80vh; overflow-y: auto;">
       <h3 id="legal-modal-title" class="modal-title">Legal Document</h3>
       <div id="legal-modal-content" class="modal-body"></div>
       <div style="text-align: right; margin-top: 16px;">
         <button id="btn-close-legal" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedback-modal-overlay" class="modal-overlay">
+    <div class="modal-window">
+      <h3 class="modal-title">Founder Support & Feature Requests</h3>
+      <p class="modal-body">Have a suggestion for a new financial simulator, feature request, or feedback on Budof?</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <input type="email" id="feedback-email" placeholder="Your email (optional)" class="input-num" style="font-size:13px;">
+        <textarea id="feedback-text" rows="4" placeholder="Your suggestion or bug report..." class="input-num" style="font-size:13px; font-family:sans-serif;"></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <button id="btn-submit-feedback" class="btn-primary">Send Message</button>
+          <button id="btn-close-feedback" class="btn-secondary">Close</button>
+        </div>
+        <div id="feedback-success" style="display:none; color:#059669; font-weight:600; font-size:12px; margin-top:4px;">✓ Thank you! Your feedback has been noted.</div>
       </div>
     </div>
   </div>
@@ -716,16 +869,19 @@
         <strong>BUDOF.COM</strong> — Zero-Subscription Operational Finance Suite • Hosted on Cloudflare Pages.
       </div>
       <div class="footer-links">
-        <a href="#tab-runway" class="footer-tab-link" data-tab="tab-runway">Runway Calculator</a>
-        <a href="#tab-unit-economics" class="footer-tab-link" data-tab="tab-unit-economics">SaaS CAC/LTV</a>
-        <a href="#tab-tycoon" class="footer-tab-link" data-tab="tab-tycoon">Startup Game</a>
+        <a href="#runway" class="footer-tab-link" data-tab="tab-runway">Runway Calculator</a>
+        <a href="#unit-economics" class="footer-tab-link" data-tab="tab-unit-economics">SaaS CAC/LTV</a>
+        <a href="#benchmarks" class="footer-tab-link" data-tab="tab-benchmarks">SaaS Benchmarks</a>
+        <a href="#tycoon" class="footer-tab-link" data-tab="tab-tycoon">Startup Game</a>
         <a href="#" id="link-privacy">Privacy Policy</a>
         <a href="#" id="link-terms">Terms of Use</a>
         <a href="#" id="link-disclaimer">Financial Disclaimer</a>
+        <a href="#" id="link-feedback">Support & Feedback</a>
       </div>
     </div>
   </footer>
 
-  <script type="module" src="app.js"></script>
+  <!-- Self-contained production bundle (Executes under both file:/// and https://) -->
+  <script src="bundle.js"></script>
 </body>
 </html>

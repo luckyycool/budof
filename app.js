@@ -1,12 +1,15 @@
 /**
  * Budof — Master SPA Application Controller
- * Handles real-time reactivity, canvas charting, tycoon game loop, and exports.
+ * High-performance, reactive financial simulation suite.
  */
 
 import { formatCurrency, formatCompactCurrency, formatPercent, formatMonths, formatNumber } from './js/utils/formatters.js';
 import { calculateRunway } from './js/engine/runway-simulator.js';
 import { calculateUnitEconomics } from './js/engine/unit-economics.js';
 import { calculatePricingTiers } from './js/engine/pricing-calculator.js';
+import { INDUSTRY_PRESETS } from './js/engine/presets.js';
+import { SAAS_BENCHMARKS, calculateSaaSValuation } from './js/engine/valuation.js';
+import { SoundEngine } from './js/engine/audio.js';
 import { TycoonGame } from './js/engine/tycoon-game.js';
 import { FinancialChartRenderer } from './js/engine/chart-renderer.js';
 import { exportRunwayToCSV, printExecutiveReport } from './js/utils/exporter.js';
@@ -14,42 +17,63 @@ import { exportRunwayToCSV, printExecutiveReport } from './js/utils/exporter.js'
 // --- State Variables ---
 let chartRenderer = null;
 let currentRunwayResult = null;
-let headcountData = [
-  { id: '1', role: 'Lead Fullstack Engineer', monthlySalary: 7500, startMonth: 1 },
-  { id: '2', role: 'Growth Marketer', monthlySalary: 4500, startMonth: 3 },
-  { id: '3', role: 'DevOps & Cloud Architect', monthlySalary: 7000, startMonth: 6 }
-];
+let activePresetKey = 'bootstrapped_profitable';
 
+const soundEngine = new SoundEngine();
 const tycoon = new TycoonGame();
+
+let headcountData = JSON.parse(JSON.stringify(INDUSTRY_PRESETS.bootstrapped_profitable.headcount));
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
+  setupPresets();
   setupRunwaySimulator();
   setupUnitEconomics();
   setupPricingCalculator();
+  setupBenchmarksAndValuation();
   setupTycoonSimulator();
   setupExportAndLegal();
+  handleUrlHash();
 });
 
-// --- Tab Navigation ---
+// --- Tab Navigation & Hash Routing ---
+function switchTab(targetId) {
+  const tabButtons = document.querySelectorAll('.nav-tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  tabButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === targetId);
+  });
+  panels.forEach(p => {
+    p.classList.toggle('active', p.id === targetId);
+  });
+
+  if (targetId === 'tab-runway' && chartRenderer) {
+    setTimeout(() => chartRenderer.render(), 50);
+  }
+
+  // Update URL hash cleanly without page reload
+  try {
+    const cleanHash = targetId.replace('tab-', '');
+    if (window.location.hash.slice(1) !== cleanHash) {
+      history.replaceState(null, null, `#${cleanHash}`);
+    }
+  } catch {}
+}
+
+function handleUrlHash() {
+  const hash = (window.location.hash || '').replace('#', '');
+  if (!hash) return;
+  const targetId = `tab-${hash}`;
+  if (document.getElementById(targetId)) {
+    switchTab(targetId);
+  }
+}
+
 function setupNavigation() {
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
   const footerTabLinks = document.querySelectorAll('.footer-tab-link');
-  const panels = document.querySelectorAll('.tab-panel');
-
-  function switchTab(targetId) {
-    tabButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === targetId);
-    });
-    panels.forEach(p => {
-      p.classList.toggle('active', p.id === targetId);
-    });
-
-    if (targetId === 'tab-runway' && chartRenderer) {
-      setTimeout(() => chartRenderer.render(), 50);
-    }
-  }
 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -62,7 +86,87 @@ function setupNavigation() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+
+  window.addEventListener('hashchange', handleUrlHash);
 }
+
+// --- MODULE: INDUSTRY PRESETS (1-Click Real-World Models) ---
+function setupPresets() {
+  const presetContainer = document.getElementById('presets-pills-bar');
+  if (!presetContainer) return;
+
+  presetContainer.innerHTML = '';
+  Object.keys(INDUSTRY_PRESETS).forEach(key => {
+    const p = INDUSTRY_PRESETS[key];
+    const btn = document.createElement('button');
+    btn.className = `preset-pill ${key === activePresetKey ? 'active' : ''}`;
+    btn.innerHTML = `<span class="preset-icon">${p.icon}</span> <strong>${p.name}</strong>`;
+    btn.title = p.tagline;
+
+    btn.addEventListener('click', () => {
+      activePresetKey = key;
+      document.querySelectorAll('.preset-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(key);
+    });
+
+    presetContainer.appendChild(btn);
+  });
+}
+
+function applyPreset(key) {
+  const preset = INDUSTRY_PRESETS[key];
+  if (!preset) return;
+
+  // 1. Runway parameters
+  const sliderCash = document.getElementById('input-starting-cash');
+  const sliderMRR = document.getElementById('input-current-mrr');
+  const sliderGrowth = document.getElementById('input-growth-rate');
+  const sliderOpEx = document.getElementById('input-monthly-opex');
+
+  if (sliderCash) sliderCash.value = preset.startingCash;
+  if (sliderMRR) sliderMRR.value = preset.currentMRR;
+  if (sliderGrowth) sliderGrowth.value = (preset.monthlyGrowthRate * 100).toFixed(1);
+  if (sliderOpEx) sliderOpEx.value = preset.monthlyOpEx;
+
+  // Headcount
+  headcountData = JSON.parse(JSON.stringify(preset.headcount));
+  renderHeadcountUI(triggerRunwayUpdate);
+  triggerRunwayUpdate();
+
+  // 2. Unit Economics parameters
+  const ue = preset.unitEconomics;
+  if (ue) {
+    const sliderCAC = document.getElementById('input-cac');
+    const sliderARPU = document.getElementById('input-arpu');
+    const sliderGM = document.getElementById('input-gross-margin');
+    const sliderChurn = document.getElementById('input-churn-rate');
+    const inputSMSpend = document.getElementById('input-sm-spend');
+    const inputNetARR = document.getElementById('input-net-arr');
+    const inputGrowth = document.getElementById('input-annual-growth');
+    const inputFCF = document.getElementById('input-fcf-margin');
+
+    if (sliderCAC) sliderCAC.value = ue.cac;
+    if (sliderARPU) sliderARPU.value = ue.arpu;
+    if (sliderGM) sliderGM.value = ue.grossMarginPct;
+    if (sliderChurn) sliderChurn.value = ue.monthlyChurnPct;
+    if (inputSMSpend) inputSMSpend.value = ue.smSpend;
+    if (inputNetARR) inputNetARR.value = ue.netARR;
+    if (inputGrowth) inputGrowth.value = ue.annualGrowth;
+    if (inputFCF) inputFCF.value = ue.fcfMargin;
+
+    triggerUnitEconomicsUpdate();
+  }
+
+  // Preset announcement banner
+  const banner = document.getElementById('preset-status-banner');
+  if (banner) {
+    banner.innerHTML = `Loaded Verified Financial Template: <strong>${preset.name}</strong> (${preset.tagline})`;
+  }
+}
+
+let triggerRunwayUpdate = () => {};
+let triggerUnitEconomicsUpdate = () => {};
 
 // --- MODULE 1: RUNWAY SIMULATOR ---
 function setupRunwaySimulator() {
@@ -141,7 +245,8 @@ function setupRunwaySimulator() {
     renderRunwayTable(currentRunwayResult.monthlyProjections);
   }
 
-  [sliderCash, sliderMRR, sliderGrowth, sliderOpEx].forEach(s => s.addEventListener('input', update));
+  triggerRunwayUpdate = update;
+  [sliderCash, sliderMRR, sliderGrowth, sliderOpEx].forEach(s => s && s.addEventListener('input', update));
 
   // Headcount list UI
   renderHeadcountUI(update);
@@ -150,19 +255,21 @@ function setupRunwaySimulator() {
   const inputRole = document.getElementById('new-hire-role');
   const inputSalary = document.getElementById('new-hire-salary');
 
-  btnAddHire.addEventListener('click', () => {
-    const role = (inputRole.value || '').trim() || 'Software Engineer';
-    const salary = Number(inputSalary.value) || 5000;
-    headcountData.push({
-      id: Date.now().toString(),
-      role,
-      monthlySalary: salary,
-      startMonth: 1
+  if (btnAddHire) {
+    btnAddHire.addEventListener('click', () => {
+      const role = (inputRole.value || '').trim() || 'Software Engineer';
+      const salary = Number(inputSalary.value) || 5000;
+      headcountData.push({
+        id: Date.now().toString(),
+        role,
+        monthlySalary: salary,
+        startMonth: 1
+      });
+      inputRole.value = '';
+      renderHeadcountUI(update);
+      update();
     });
-    inputRole.value = '';
-    renderHeadcountUI(update);
-    update();
-  });
+  }
 
   update();
 }
@@ -180,7 +287,7 @@ function renderHeadcountUI(onUpdateCallback) {
         <strong>${member.role}</strong>
         <span style="color:#64748B; margin-left:4px;">${formatCurrency(member.monthlySalary)}/mo (M${member.startMonth}+)</span>
       </div>
-      <button class="btn-remove" data-id="${member.id}">✕</button>
+      <button class="btn-remove" data-id="${member.id}" title="Remove role">✕</button>
     `;
 
     row.querySelector('.btn-remove').addEventListener('click', () => {
@@ -295,8 +402,9 @@ function setupUnitEconomics() {
     });
   }
 
+  triggerUnitEconomicsUpdate = update;
   [sliderCAC, sliderARPU, sliderGM, sliderChurn, inputSMSpend, inputNetARR, inputGrowth, inputFCF].forEach(elem => {
-    elem.addEventListener('input', update);
+    if (elem) elem.addEventListener('input', update);
   });
 
   update();
@@ -358,10 +466,55 @@ function setupPricingCalculator() {
   }
 
   [inputCust, inputStarter, inputPro, inputEnterprise, sliderDiscount, sliderAdoption].forEach(el => {
-    el.addEventListener('input', update);
+    if (el) el.addEventListener('input', update);
   });
 
   update();
+}
+
+// --- MODULE 5: SAAS BENCHMARKS & VALUATION ENCYCLOPEDIA ---
+function setupBenchmarksAndValuation() {
+  const tableBody = document.getElementById('benchmarks-table-body');
+  if (tableBody) {
+    tableBody.innerHTML = '';
+    SAAS_BENCHMARKS.forEach(b => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${b.metric}</strong><p style="font-size:11px; color:#64748B; margin-top:2px;">${b.importance}</p></td>
+        <td class="mono" style="color:#059669; font-weight:700;">${b.topQuartile}</td>
+        <td class="mono" style="color:#0F172A; font-weight:600;">${b.median}</td>
+        <td class="mono" style="color:#DC2626;">${b.bottomQuartile}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  const sliderARR = document.getElementById('val-arr-input');
+  const sliderGrowth = document.getElementById('val-growth-input');
+  const sliderR40 = document.getElementById('val-r40-input');
+
+  function updateValuation() {
+    if (!sliderARR) return;
+    const arr = Number(sliderARR.value) || 500000;
+    const growth = Number(sliderGrowth.value) || 50;
+    const r40 = Number(sliderR40.value) || 35;
+
+    const val = calculateSaaSValuation(arr, growth, r40);
+
+    const elBear = document.getElementById('val-result-bear');
+    const elBase = document.getElementById('val-result-base');
+    const elBull = document.getElementById('val-result-bull');
+
+    if (elBear) elBear.textContent = `${formatCompactCurrency(val.valuationBear)} (${val.bearMultiple}x)`;
+    if (elBase) elBase.textContent = `${formatCompactCurrency(val.valuationBase)} (${val.baseMultiple}x)`;
+    if (elBull) elBull.textContent = `${formatCompactCurrency(val.valuationBull)} (${val.bullMultiple}x)`;
+  }
+
+  [sliderARR, sliderGrowth, sliderR40].forEach(el => {
+    if (el) el.addEventListener('input', updateValuation);
+  });
+
+  updateValuation();
 }
 
 // --- MODULE 4: STARTUP TYCOON SIMULATOR ---
@@ -372,6 +525,8 @@ function setupTycoonSimulator() {
   const hudBurn = document.getElementById('tycoon-hud-burn');
   const hudCustomers = document.getElementById('tycoon-hud-customers');
   const hudQuality = document.getElementById('tycoon-hud-quality');
+  const hudProgress = document.getElementById('tycoon-progress-bar');
+  const hudAudioBtn = document.getElementById('btn-tycoon-audio');
 
   const countFounders = document.getElementById('team-count-founders');
   const countEngineers = document.getElementById('team-count-engineers');
@@ -398,6 +553,14 @@ function setupTycoonSimulator() {
   const choiceTitle1 = document.getElementById('choice-title-1');
   const choiceDesc1 = document.getElementById('choice-desc-1');
 
+  if (hudAudioBtn) {
+    hudAudioBtn.textContent = soundEngine.muted ? '🔇 Sound: Off' : '🔊 Sound: On';
+    hudAudioBtn.addEventListener('click', () => {
+      const isMuted = soundEngine.toggleMute();
+      hudAudioBtn.textContent = isMuted ? '🔇 Sound: Off' : '🔊 Sound: On';
+    });
+  }
+
   function renderHUD() {
     hudMonth.textContent = `Month ${tycoon.month} / ${tycoon.maxMonths}`;
     hudCash.textContent = formatCurrency(tycoon.cash);
@@ -411,6 +574,11 @@ function setupTycoonSimulator() {
     hudCustomers.textContent = formatNumber(tycoon.customers);
     hudQuality.textContent = `${tycoon.productQuality} / 100`;
 
+    if (hudProgress) {
+      const progressPct = ((tycoon.month - 1) / (tycoon.maxMonths - 1)) * 100;
+      hudProgress.style.width = `${progressPct}%`;
+    }
+
     countFounders.textContent = tycoon.team.founders;
     countEngineers.textContent = tycoon.team.engineers;
     countMarketers.textContent = tycoon.team.marketers;
@@ -418,6 +586,12 @@ function setupTycoonSimulator() {
 
     displayMarketing.textContent = formatCurrency(tycoon.budget.marketing);
     displayRD.textContent = formatCurrency(tycoon.budget.rAndD);
+
+    // Update cap table summary
+    const elFounderEq = document.getElementById('cap-founder-equity');
+    const elInvestorEq = document.getElementById('cap-investor-equity');
+    if (elFounderEq) elFounderEq.textContent = `${100 - tycoon.equityDilutionPct}%`;
+    if (elInvestorEq) elInvestorEq.textContent = `${tycoon.equityDilutionPct}%`;
   }
 
   function addLog(text) {
@@ -430,56 +604,62 @@ function setupTycoonSimulator() {
   }
 
   // Team hiring buttons
-  document.getElementById('btn-hire-engineer').addEventListener('click', () => { tycoon.hire('engineers'); renderHUD(); });
-  document.getElementById('btn-fire-engineer').addEventListener('click', () => { tycoon.fire('engineers'); renderHUD(); });
-  document.getElementById('btn-hire-marketer').addEventListener('click', () => { tycoon.hire('marketers'); renderHUD(); });
-  document.getElementById('btn-fire-marketer').addEventListener('click', () => { tycoon.fire('marketers'); renderHUD(); });
-  document.getElementById('btn-hire-sales').addEventListener('click', () => { tycoon.hire('sales'); renderHUD(); });
-  document.getElementById('btn-fire-sales').addEventListener('click', () => { tycoon.fire('sales'); renderHUD(); });
+  document.getElementById('btn-hire-engineer')?.addEventListener('click', () => { tycoon.hire('engineers'); soundEngine.playTurnTick(); renderHUD(); });
+  document.getElementById('btn-fire-engineer')?.addEventListener('click', () => { tycoon.fire('engineers'); soundEngine.playTurnTick(); renderHUD(); });
+  document.getElementById('btn-hire-marketer')?.addEventListener('click', () => { tycoon.hire('marketers'); soundEngine.playTurnTick(); renderHUD(); });
+  document.getElementById('btn-fire-marketer')?.addEventListener('click', () => { tycoon.fire('marketers'); soundEngine.playTurnTick(); renderHUD(); });
+  document.getElementById('btn-hire-sales')?.addEventListener('click', () => { tycoon.hire('sales'); soundEngine.playTurnTick(); renderHUD(); });
+  document.getElementById('btn-fire-sales')?.addEventListener('click', () => { tycoon.fire('sales'); soundEngine.playTurnTick(); renderHUD(); });
 
-  sliderMarketing.addEventListener('input', () => {
+  sliderMarketing?.addEventListener('input', () => {
     tycoon.setBudget('marketing', sliderMarketing.value);
     renderHUD();
   });
-  sliderRD.addEventListener('input', () => {
+  sliderRD?.addEventListener('input', () => {
     tycoon.setBudget('rAndD', sliderRD.value);
     renderHUD();
   });
 
   // Advance Turn
-  btnAdvance.addEventListener('click', () => {
+  btnAdvance?.addEventListener('click', () => {
     if (tycoon.status !== 'active') {
       alert(`Game ended with status: ${tycoon.status}. Click 'Reset Journey' to try again!`);
       return;
     }
 
+    soundEngine.playTurnTick();
     const step = tycoon.advanceTurn();
     renderHUD();
 
     if (step.pendingEvent) {
+      soundEngine.playCrisisChime();
       showEventModal(step.pendingEvent);
       return;
     }
 
     if (step.status === 'bankrupt') {
+      soundEngine.playCrisisChime();
       addLog(`🚨 BANKRUPT: You ran out of cash at Month ${tycoon.month}!`);
       alert('Game Over: Cash depleted. You ran out of runway before achieving profitability.');
       return;
     }
 
     if (step.status === 'unicorn') {
+      soundEngine.playVictoryJingle();
       addLog(`🦄 UNICORN: Reached $1M ARR ($83.3k MRR) at Month 24!`);
       alert('VICTORY! You scaled past $1,000,000 ARR in 24 months!');
       return;
     }
 
     if (step.status === 'default_alive') {
+      soundEngine.playVictoryJingle();
       addLog(`✅ DEFAULT ALIVE: Cash-flow positive & self-sustaining at Month 24!`);
       alert('VICTORY! You reached Month 24 cash-flow positive and built an enduring SaaS company!');
       return;
     }
 
     if (step.status === 'completed') {
+      soundEngine.playVictoryJingle();
       addLog(`🏁 FINISHED: Survived 24 months with positive bank balance.`);
       return;
     }
@@ -502,44 +682,52 @@ function setupTycoonSimulator() {
     eventModal.classList.add('open');
   }
 
-  choiceBtn0.addEventListener('click', () => {
+  choiceBtn0?.addEventListener('click', () => {
     const res = tycoon.resolveEvent(0);
     eventModal.classList.remove('open');
+    soundEngine.playTurnTick();
     renderHUD();
     if (res && res.message) addLog(`⚡ ${res.message}`);
   });
 
-  choiceBtn1.addEventListener('click', () => {
+  choiceBtn1?.addEventListener('click', () => {
     const res = tycoon.resolveEvent(1);
     eventModal.classList.remove('open');
+    soundEngine.playTurnTick();
     renderHUD();
     if (res && res.message) addLog(`⚡ ${res.message}`);
   });
 
   // Investor Pitching
-  document.getElementById('btn-pitch-angel').addEventListener('click', () => {
+  document.getElementById('btn-pitch-angel')?.addEventListener('click', () => {
     const res = tycoon.pitchInvestors('angel');
+    if (res.success) soundEngine.playCashRegister();
+    else soundEngine.playCrisisChime();
     renderHUD();
     addLog(res.message);
     alert(res.message);
   });
 
-  document.getElementById('btn-pitch-seed').addEventListener('click', () => {
+  document.getElementById('btn-pitch-seed')?.addEventListener('click', () => {
     const res = tycoon.pitchInvestors('seed');
+    if (res.success) soundEngine.playCashRegister();
+    else soundEngine.playCrisisChime();
     renderHUD();
     addLog(res.message);
     alert(res.message);
   });
 
-  document.getElementById('btn-pitch-seriesa').addEventListener('click', () => {
+  document.getElementById('btn-pitch-seriesa')?.addEventListener('click', () => {
     const res = tycoon.pitchInvestors('seriesA');
+    if (res.success) soundEngine.playCashRegister();
+    else soundEngine.playCrisisChime();
     renderHUD();
     addLog(res.message);
     alert(res.message);
   });
 
   // Reset
-  btnReset.addEventListener('click', () => {
+  btnReset?.addEventListener('click', () => {
     if (confirm('Reset your startup simulation back to Month 1?')) {
       tycoon.reset();
       renderHUD();
@@ -552,13 +740,13 @@ function setupTycoonSimulator() {
 
 // --- EXPORT & LEGAL MODALS ---
 function setupExportAndLegal() {
-  document.getElementById('btn-export-csv').addEventListener('click', () => {
+  document.getElementById('btn-export-csv')?.addEventListener('click', () => {
     if (currentRunwayResult) {
       exportRunwayToCSV(currentRunwayResult);
     }
   });
 
-  document.getElementById('btn-print-report').addEventListener('click', () => {
+  document.getElementById('btn-print-report')?.addEventListener('click', () => {
     printExecutiveReport();
   });
 
@@ -567,35 +755,35 @@ function setupExportAndLegal() {
   const legalContent = document.getElementById('legal-modal-content');
   const btnClose = document.getElementById('btn-close-legal');
 
-  btnClose.addEventListener('click', () => {
+  btnClose?.addEventListener('click', () => {
     legalModal.classList.remove('open');
   });
 
-  document.getElementById('link-privacy').addEventListener('click', (e) => {
+  document.getElementById('link-privacy')?.addEventListener('click', (e) => {
     e.preventDefault();
     legalTitle.textContent = 'Privacy Policy';
     legalContent.innerHTML = `
-      <p><strong>1. Zero Data Collection:</strong> Budof (budof.com) does not store, transmit, or sell your financial figures. All projections and calculations run 100% locally in your web browser.</p>
+      <p><strong>1. Zero Data Collection:</strong> Budof (budof.com) does not store, transmit, or monetize your private financial numbers. All runway models, employee salaries, and unit economics calculations run 100% locally in your web browser.</p>
       <br>
-      <p><strong>2. Local Storage:</strong> Simulation state and custom hiring plans are persisted strictly inside your browser's private localStorage and never touch external servers.</p>
+      <p><strong>2. Local Storage:</strong> Custom hiring plans and simulation checkpoints are saved strictly inside your browser's private localStorage and never touch any cloud or external database.</p>
       <br>
       <p><strong>3. Advertising & Cookies:</strong> We partner with Google AdSense to serve non-intrusive contextual ads. Third-party vendors use cookies to serve ads based on user visits.</p>
     `;
     legalModal.classList.add('open');
   });
 
-  document.getElementById('link-terms').addEventListener('click', (e) => {
+  document.getElementById('link-terms')?.addEventListener('click', (e) => {
     e.preventDefault();
     legalTitle.textContent = 'Terms of Use';
     legalContent.innerHTML = `
       <p><strong>1. Free License:</strong> Budof grants you an open, royalty-free license to model financial forecasts, export reports, and use simulation tools for commercial and educational purposes.</p>
       <br>
-      <p><strong>2. Accuracy & Estimates:</strong> Calculations are heuristic mathematical simulations. Actual future cash reserves, tax rates, and customer acquisition costs will vary based on macroeconomic conditions.</p>
+      <p><strong>2. Accuracy & Heuristics:</strong> Calculations are heuristic mathematical simulations. Actual future cash reserves, tax rates, and customer acquisition costs will vary based on macroeconomic conditions.</p>
     `;
     legalModal.classList.add('open');
   });
 
-  document.getElementById('link-disclaimer').addEventListener('click', (e) => {
+  document.getElementById('link-disclaimer')?.addEventListener('click', (e) => {
     e.preventDefault();
     legalTitle.textContent = 'Financial & Legal Disclaimer';
     legalContent.innerHTML = `
@@ -604,5 +792,29 @@ function setupExportAndLegal() {
       <p>Nothing on this website constitutes formal accounting, legal, or investment advice. Always consult a Certified Public Accountant (CPA) or corporate securities attorney before making funding or hiring decisions.</p>
     `;
     legalModal.classList.add('open');
+  });
+
+  const feedbackModal = document.getElementById('feedback-modal-overlay');
+  const btnCloseFeedback = document.getElementById('btn-close-feedback');
+  const btnSubmitFeedback = document.getElementById('btn-submit-feedback');
+
+  btnCloseFeedback?.addEventListener('click', () => {
+    feedbackModal.classList.remove('open');
+  });
+
+  document.getElementById('link-feedback')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    feedbackModal.classList.add('open');
+  });
+
+  btnSubmitFeedback?.addEventListener('click', () => {
+    const text = document.getElementById('feedback-text')?.value;
+    if (text) {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('budof_feedback_' + Date.now(), text);
+      }
+      const successEl = document.getElementById('feedback-success');
+      if (successEl) successEl.style.display = 'block';
+    }
   });
 }
