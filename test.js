@@ -376,6 +376,11 @@ test('Static Assets: Compiled bundle.js exists and is valid', () => {
   const bundle = fs.readFileSync('./bundle.js', 'utf-8');
   assert.ok(bundle.includes('Budof Standalone Production Bundle'), 'Must be compiled standalone bundle');
   assert.ok(bundle.length > 50000, 'Bundle must contain all engines');
+  
+  // Syntax integrity check
+  assert.doesNotThrow(() => {
+    new Function(bundle);
+  }, 'bundle.js must parse with zero syntax errors');
 });
 
 test('Static Assets: Swiss Daylight styles.css integrity', () => {
@@ -400,6 +405,21 @@ test('Static Assets: SEO & Cloudflare deployment files', () => {
   assert.ok(fs.existsSync('./og-banner.svg'), 'og-banner.svg must exist');
   assert.ok(fs.statSync('./og-image.png').size > 10000, 'og-image.png must be non-empty image');
   assert.ok(fs.statSync('./og-banner.svg').size > 1000, 'og-banner.svg must be non-empty SVG');
+
+  // Verify no broken fake ad-slot numbers exist in HTML files
+  const htmlFiles = [
+    './index.html',
+    './runway-calculator/index.html',
+    './saas-unit-economics/index.html',
+    './fundraising-calculator/index.html',
+    './saas-valuation/index.html',
+    './startup-tycoon/index.html',
+    './deals-perks/index.html'
+  ];
+  for (const file of htmlFiles) {
+    const content = fs.readFileSync(file, 'utf-8');
+    assert.ok(!content.includes('9812739102'), `${file} must not contain fake ad slot 9812739102 which causes Google AdSense 400 Bad Request`);
+  }
 });
 
 // 11. Multi-Page Static SEO Architecture Tests

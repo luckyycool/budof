@@ -2620,8 +2620,6 @@
           diagList.appendChild(card);
         });
       }
-        diagList.appendChild(card);
-      });
     }
   
     triggerUnitEconomicsUpdate = update;
